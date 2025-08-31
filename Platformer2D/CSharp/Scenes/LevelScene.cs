@@ -28,7 +28,7 @@ public abstract class LevelScene : Scene
     {
         WorldDef = new WorldDef() 
         {
-            Gravity = new Vector2(0, 9.81F), 
+            Gravity = new Vector2(0, 9.81F),
         }
     })) { }
 

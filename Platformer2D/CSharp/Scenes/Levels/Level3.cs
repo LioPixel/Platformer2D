@@ -20,11 +20,11 @@ public class Level3 : LevelScene
         this.CreatePlatform(16, -4, 3);
         this.CreateTree(17, -5);
         this.CreateStair(23, -4, 4, StairType.Down);
-        this.CreatePlatform(33, 0, 1);
-        this.CreateStair(36, -1, 8, StairType.Up);
+        this.CreatePlatform(31, 0, 1);
+        this.CreateStair(35, -1, 8, StairType.Up);
         this.CreateRockWithGrass(26, -2);
-        this.CreatePlatform(49, -8, 1);
-        this.CreateWinFlag(49, -9);
+        this.CreatePlatform(47, -8, 1);
+        this.CreateWinFlag(47, -9);
     }
 
     protected override void OnLevelWon()

@@ -6,6 +6,7 @@ using Bliss.CSharp.Transformations;
 using Box2D;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes;
+using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
 using Sparkle.CSharp.GUI;
@@ -32,6 +33,11 @@ public class Player : Entity
     
     private const int TotalFrames = 8;
     
+    private readonly HashSet<ulong> _groundContacts = new();
+    
+    private readonly HashSet<ulong> _leftContacts = new();
+    private readonly HashSet<ulong> _rightContacts = new();
+    
     public Player(Transform transform) : base(transform, "player") { }
 
     protected override void Init()
@@ -45,24 +51,46 @@ public class Player : Entity
         {
             Type = BodyType.Dynamic,
             FixedRotation = true,
-            GravityScale = 4.5F
+            GravityScale = 15.5F
         }, new PolygonShape2D(Polygon.MakeBox(7, 8), new ShapeDef()
         {
             Density = 100,
-            UserData = "Foot",
-            EnableContactEvents = true
+            UserData = "Player",
+            EnableContactEvents = true,
+            EnableSensorEvents = true
         }));
         
         this.AddComponent(body);
         
+        body.CreateShape(new ShapeDef()
+        {
+            IsSensor = true,
+            UserData = "PlayerLeftSensor",
+            EnableContactEvents = false,
+            EnableSensorEvents = true
+        }, Polygon.MakeOffsetBox(2, 7, new Vector2(-7, -1), Rotation.Identity));
+        
+        body.CreateShape(new ShapeDef()
+        {
+            IsSensor = true,
+            UserData = "PlayerRightSensor",
+            EnableContactEvents = false,
+            EnableSensorEvents = true
+        }, Polygon.MakeOffsetBox(2, 7, new Vector2(7, -1), Rotation.Identity));
+        
         // Contact event.
         ((Simulation2D) this.Scene.Simulation).ContactBeginTouch += this.ContactBeginTouch;
         ((Simulation2D) this.Scene.Simulation).ContactEndTouch += this.ContactEndTouch;
+        ((Simulation2D) this.Scene.Simulation).SensorBeginTouch += this.ContactBeginSensorTouch;
+        ((Simulation2D) this.Scene.Simulation).SensorEndTouch += this.ContactEndSensorTouch;
     }
 
     protected override void Update(double delta)
     {
         base.Update(delta);
+        bool isGround = IsPlayerOnGround > 0;
+        bool isLeftWallCol = false; // CHATGPT HERE.
+        bool isRightWallCol = false; // CHATGPT HERE.
         
         // Sprite animation.
         // increment timer
@@ -77,18 +105,24 @@ public class Player : Entity
 
                 if (_frame >= TotalFrames)
                 {
+                    _frame = 7;
                     _timer = 0;
-                    _frame = 0;
-                    _isJumping = false;
-
-                    if (this.PoseType == PlayerPoseType.JumpLeft)
-                    {
-                        this.PoseType = PlayerPoseType.LeftIdle;
-                    }
                     
-                    if (this.PoseType == PlayerPoseType.JumpRight)
+                    if (isGround)
                     {
-                        this.PoseType = PlayerPoseType.RightIdle;
+                        _timer = 0;
+                        _frame = 0;
+                        _isJumping = false;
+
+                        if (this.PoseType == PlayerPoseType.JumpLeft)
+                        {
+                            this.PoseType = PlayerPoseType.LeftIdle;
+                        }
+                        
+                        if (this.PoseType == PlayerPoseType.JumpRight)
+                        {
+                            this.PoseType = PlayerPoseType.RightIdle;
+                        }
                     }
                 }
                 
@@ -118,15 +152,13 @@ public class Player : Entity
         float groundAccel = 3f;    // how fast player accelerates on ground
         float airAccel = 0.5f;     // how fast player accelerates in air
         float maxSpeed = 50f;      // max horizontal speed
-        float jumpForce = 40;
+        float jumpForce = 90;
 
         Vector2 velocity = body.LinearVelocity;
-
-        bool isGround = IsPlayerOnGround > 0;
         
         // Horizontal input
         float input = 0f;
-        if (Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left))
+        if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
         {
             input -= 1f;
             if (!_isJumping && isGround)
@@ -136,7 +168,7 @@ public class Player : Entity
             }
         }
 
-        if (Input.IsKeyDown(KeyboardKey.D) || Input.IsKeyDown(KeyboardKey.Right))
+        if ((Input.IsKeyDown(KeyboardKey.D) || Input.IsKeyDown(KeyboardKey.Right)) && !isRightWallCol)
         {
             input += 1f;
             if (!_isJumping && isGround)
@@ -220,13 +252,47 @@ public class Player : Entity
         }
     }
 
+    private void ContactBeginSensorTouch(SensorBeginTouchEvent e)
+    {
+        // Check wall left.
+        if ((e.SensorShape.UserData?.ToString() == "PlayerLeftSensor") ||
+            e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor")
+        {
+            Logger.Error("LEFT WALLL");
+            _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
+        }
+        
+        // Check wall right.
+        if ((e.SensorShape.UserData?.ToString() == "PlayerRightSensor") ||
+            e.VisitorShape.UserData?.ToString() == "PlayerRightSensor")
+        {
+            Logger.Error("RIGHT WALLL");
+            _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
+        }
+    }
+
+    private void ContactEndSensorTouch(SensorEndTouchEvent e)
+    {
+        // Check ground.
+        ulong key = ContactKey(e.SensorShape, e.VisitorShape);
+        if (_groundContacts.Remove(key))
+        {
+            IsPlayerOnGround = _groundContacts.Count;
+        }
+        
+        Logger.Error("Test");
+    }
+
     private void ContactBeginTouch(ContactBeginTouchEvent e)
     {
         // Check ground.
-        if ((e.ShapeA.UserData?.ToString() == "Foot" && e.ShapeB.Body.Type == BodyType.Static) ||
-            e.ShapeB.UserData?.ToString() == "Foot" && e.ShapeA.Body.Type == BodyType.Static)
+        if (IsGroundContact(e))
         {
-            IsPlayerOnGround += 1;
+            ulong key = ContactKey(e.ShapeA, e.ShapeB);
+            if (_groundContacts.Add(key))
+            {
+                IsPlayerOnGround = _groundContacts.Count;
+            }
         }
         
         // Win level.
@@ -253,10 +319,10 @@ public class Player : Entity
     private void ContactEndTouch(ContactEndTouchEvent e)
     {
         // Check ground.
-        if ((e.ShapeA.UserData?.ToString() == "Foot" && e.ShapeB.Body.Type == BodyType.Static) ||
-            e.ShapeB.UserData?.ToString() == "Foot" && e.ShapeA.Body.Type == BodyType.Static)
+        ulong key = ContactKey(e.ShapeA, e.ShapeB);
+        if (_groundContacts.Remove(key))
         {
-            IsPlayerOnGround -= 1;
+            IsPlayerOnGround = _groundContacts.Count;
         }
     }
 
@@ -284,7 +350,39 @@ public class Player : Entity
                 break;
         }
     }
+    
+    private ulong ContactKey(Shape a, Shape b)
+    {
+        unchecked
+        {
+            ulong ha = (ulong)a.GetHashCode();
+            ulong hb = (ulong)b.GetHashCode();
+            return ha < hb ? (ha << 32) ^ hb : (hb << 32) ^ ha;
+        }
+    }
+    
+    private bool IsGroundContact(ContactBeginTouchEvent e)
+    {
+        // Must involve the Foot
+        bool footIsA = e.ShapeA.UserData?.ToString() == "Player";
+        bool footIsB = e.ShapeB.UserData?.ToString() == "Player";
+        if (!footIsA && !footIsB) return false;
 
+        // Get world normal
+        var n = e.Manifold.Normal;
+
+        // Flip normal if needed so it always points from ground->foot
+        if (footIsA) n = -n;
+
+        // Compare against gravity (works for Y-down or Y-up)
+        var sim = (Simulation2D)this.Scene.Simulation;
+        var g = Vector2.Normalize(sim.World.Gravity);
+        if (g.LengthSquared() < 1e-6f) g = new Vector2(0, 1);
+
+        // If normal opposes gravity, it’s a floor
+        return Vector2.Dot(n, -g) > 0.6f;
+    }
+    
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
