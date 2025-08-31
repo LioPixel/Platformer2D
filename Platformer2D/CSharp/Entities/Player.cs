@@ -89,8 +89,8 @@ public class Player : Entity
     {
         base.Update(delta);
         bool isGround = IsPlayerOnGround > 0;
-        bool isLeftWallCol = false; // CHATGPT HERE.
-        bool isRightWallCol = false; // CHATGPT HERE.
+        bool isLeftWallCol = _leftContacts.Count > 0; // CHATGPT HERE.
+        bool isRightWallCol = _rightContacts.Count > 0; // CHATGPT HERE.
         
         // Sprite animation.
         // increment timer
@@ -273,12 +273,10 @@ public class Player : Entity
 
     private void ContactEndSensorTouch(SensorEndTouchEvent e)
     {
-        // Check ground.
+        // Check wall.
         ulong key = ContactKey(e.SensorShape, e.VisitorShape);
-        if (_groundContacts.Remove(key))
-        {
-            IsPlayerOnGround = _groundContacts.Count;
-        }
+        _leftContacts.Remove(key);
+        _rightContacts.Remove(key);
         
         Logger.Error("Test");
     }
