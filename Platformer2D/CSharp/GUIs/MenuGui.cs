@@ -21,10 +21,13 @@ public class MenuGui : Gui
     {
         base.Init();
         
+        LabelData fullscreen = new LabelData(ContentRegistry.Fontoe, "please go to full screen", 18, color: Color.LightGray, scale: new Vector2(1.5F, 1.5F));
+        this.AddElement("fullscreen", new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0))); 
+        
         LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Platformer2D", 18, scale: new Vector2(5, 5));
         this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100)));
 
-        string controlText = "Controls:\nA: LEFT\nD: RIGHT\nSpace: JUMP";
+        string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace: JUMP";
         LabelData controlLabelData = new LabelData(ContentRegistry.Fontoe, controlText, 18, color: Color.Gray);
         this.AddElement("Control-Label", new LabelElement(controlLabelData, Anchor.TopLeft, new Vector2(10, 10)));
         

@@ -9,3 +9,4 @@ GameSettings settings = new GameSettings()
 
 using PlatformerGame game = new PlatformerGame(settings);
 game.Run(null);
+

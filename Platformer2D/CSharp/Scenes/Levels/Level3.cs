@@ -10,6 +10,7 @@ public class Level3 : LevelScene
     {
         base.Init();
         
+        this.Background = ContentRegistry.Background4;
         this.CreatePlatform(0, 0, 2);
         this.CreateFlowerOrange(1, -1);
         this.CreatePlatform(3, 1, 3);
@@ -28,6 +29,11 @@ public class Level3 : LevelScene
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level3("Level3"));
+        SceneManager.SetScene(new Level4("Level4"));
+    }
+    
+    public override void OnLevelReset()
+    {
+        SceneManager.SetScene(new Level4("Level4"));
     }
 }

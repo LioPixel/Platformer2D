@@ -1,6 +1,9 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Camera.Dim2;
+using Bliss.CSharp.Colors;
+using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
+using Bliss.CSharp.Windowing;
 using Box2D;
 using Platformer2D.CSharp.Entities;
 using Sparkle.CSharp.Entities;
@@ -10,12 +13,15 @@ using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Sparkle.CSharp.Scenes;
+using Veldrid;
 using Transform = Bliss.CSharp.Transformations.Transform;
 
 namespace Platformer2D.CSharp.Scenes;
 
 public abstract class LevelScene : Scene
 {
+    
+    public Texture2D? Background;
     public bool WonLevel;
     
     protected LevelScene(string name) : base(name, SceneType.Scene2D, new Simulation2D(new PhysicsSettings2D()
@@ -66,7 +72,25 @@ public abstract class LevelScene : Scene
         }
     }
 
+    protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
+    {
+        // Background
+        if (this.Background != null)
+        {
+            IWindow window = GlobalGraphicsAssets.Window;
+            Vector2 backgroundSize = new Vector2((float) window.GetWidth() / this.Background.Width, (float) window.GetHeight() / this.Background.Height);
+        
+            context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+            context.SpriteBatch.DrawTexture(this.Background, Vector2.Zero, scale: backgroundSize);
+            context.SpriteBatch.End();
+        }
+        
+        base.Draw(context, framebuffer);
+    }
+
     protected abstract void OnLevelWon();
+    
+    public abstract void OnLevelReset();
 
     protected void CreatePlatform(int blockPosX, int blockPosY, int length)
     {
@@ -177,6 +201,13 @@ public abstract class LevelScene : Scene
         Entity entity = new Entity(new Transform() { Translation = new Vector3(blockPosX * 16, blockPosY * 16, 0) });
         entity.AddComponent(new Sprite(ContentRegistry.OakLog, Vector2.Zero, layerDepth: 0.4F));
         this.AddEntity(entity);
+    }
+
+    protected void CreatePortal(int blockPosX, int blockPosY, int teleportPosX, int teleportPosY, Color? color = null)
+    {
+        
+        Portal portal = new Portal(new Transform() { Translation = new Vector3(blockPosX * 16, blockPosY * 16, 0) }, new Vector2(teleportPosX * 16, teleportPosY * 16), color);
+        this.AddEntity(portal);
     }
     
     protected enum StairType

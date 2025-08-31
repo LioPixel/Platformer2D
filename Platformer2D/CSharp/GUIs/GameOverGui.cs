@@ -39,7 +39,11 @@ public class GameOverGui : Gui
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
         this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {
-            SceneManager.SetScene(new Level1("Level 1"));
+            if (SceneManager.ActiveScene is LevelScene level)
+            {
+                level.OnLevelReset();
+            }
+            
             GuiManager.SetGui(null);
             return true;
         }));

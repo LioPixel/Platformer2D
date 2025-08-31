@@ -10,6 +10,7 @@ public class Level2 : LevelScene
     {
         base.Init();
         
+        this.Background = ContentRegistry.Background2;
         this.CreatePlatform(0, 0, 3);
         this.CreatePlantSunFlower(2, -1);
         this.CreatePlatform(6, 1, 3);
@@ -28,5 +29,10 @@ public class Level2 : LevelScene
     protected override void OnLevelWon()
     {
         SceneManager.SetScene(new Level3("Level3"));
+    }
+    
+    public override void OnLevelReset()
+    {
+        SceneManager.SetScene(new Level2("Level2"));
     }
 }

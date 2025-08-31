@@ -1,14 +1,17 @@
-﻿using Sparkle.CSharp.Scenes;
+﻿using Bliss.CSharp.Textures;
+using Sparkle.CSharp.Scenes;
 
 namespace Platformer2D.CSharp.Scenes.Levels;
 
 public class Level1 : LevelScene
 {
-    public Level1(string name) : base(name) { }
+    
+    public Level1(string name) : base(name) {}
     
     protected override void Init()
     {
         base.Init();
+        this.Background = ContentRegistry.Background;
         
         this.CreatePlatform(0, 0, 4);
         this.CreatePlantSunFlower(2, -1);
@@ -24,6 +27,11 @@ public class Level1 : LevelScene
     protected override void OnLevelWon()
     {
         SceneManager.SetScene(new Level2("Level2"));
+    }
+
+    public override void OnLevelReset()
+    {
+        SceneManager.SetScene(new Level1("Level1"));
     }
 }
 

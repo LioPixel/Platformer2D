@@ -9,6 +9,25 @@ namespace Platformer2D.CSharp;
 public class ContentRegistry : Registry {
     
     public static Texture2D Sprite { get; private set; }
+    public static Texture2D PlayerIdleLeft { get; private set; }
+    public static Texture2D PlayerIdleRight { get; private set; }
+    public static Texture2D PlayerJumpLeft { get; private set; }
+    public static Texture2D PlayerJumpRight { get; private set; }
+    public static Texture2D PlayerWalkLeft { get; private set; }
+    public static Texture2D PlayerWalkRight { get; private set; }
+    public static Texture2D Background { get; private set; }
+    public static Texture2D Background2 { get; private set; }
+    public static Texture2D Background3 { get; private set; }
+    public static Texture2D Background4 { get; private set; }
+    public static Texture2D Background5 { get; private set; }
+    public static Texture2D Background6 { get; private set; }
+    public static Texture2D Background7 { get; private set; }
+    public static Texture2D Background8 { get; private set; }
+    public static Texture2D Background9 { get; private set; }
+    public static Texture2D Background10 { get; private set; }
+    public static Texture2D Background11 { get; private set; }
+    public static Texture2D Background12 { get; private set; }
+    public static Texture2D Portal { get; private set; }
     public static Texture2D OakLog { get; private set; }
     public static Texture2D PlantFlowerRed { get; private set; }
     public static Texture2D RockGrass { get; private set; }
@@ -20,14 +39,32 @@ public class ContentRegistry : Registry {
     public static Texture2D TreeBig { get; private set; }
     public static Texture2D WinFlag { get; private set; }
     public static Texture2D MenuBackground { get; private set; }
-    public static Texture2D Player { get; private set; } 
     public static Font Fontoe { get; private set; }
 
     protected override void Load(ContentManager content)
     {
         base.Load(content);
-
+        
         Sprite = content.Load(new TextureContent("content/sprite.png"));
+        Background = content.Load(new TextureContent("content/background.png"));
+        PlayerIdleLeft = content.Load(new TextureContent("content/player/idle_left.png"));
+        PlayerIdleRight = content.Load(new TextureContent("content/player/idle_right.png"));
+        PlayerJumpLeft = content.Load(new TextureContent("content/player/jump_left.png"));
+        PlayerJumpRight = content.Load(new TextureContent("content/player/jump_right.png"));
+        PlayerWalkLeft = content.Load(new TextureContent("content/player/walk_left.png"));
+        PlayerWalkRight = content.Load(new TextureContent("content/player/walk_right.png"));
+        Background2 = content.Load(new TextureContent("content/background2.png"));
+        Background3 = content.Load(new TextureContent("content/background3.png"));
+        Background4 = content.Load(new TextureContent("content/background4.png"));
+        Background5 = content.Load(new TextureContent("content/background5.png"));
+        Background6 = content.Load(new TextureContent("content/background6.png"));
+        Background7 = content.Load(new TextureContent("content/background7.png"));
+        Background8 = content.Load(new TextureContent("content/background8.png"));
+        Background9 = content.Load(new TextureContent("content/background9.png"));
+        Background10 = content.Load(new TextureContent("content/background10.png"));
+        Background11 = content.Load(new TextureContent("content/background11.png"));
+        Background12 = content.Load(new TextureContent("content/background12.png"));
+        Portal = content.Load(new TextureContent("content/portal.png"));
         OakLog = content.Load(new TextureContent("content/oak_log.png"));
         PlantFlowerRed = content.Load(new TextureContent("content/plant_flower_red.png"));
         RockGrass = content.Load(new TextureContent("content/rock_grass.png"));
@@ -39,7 +76,6 @@ public class ContentRegistry : Registry {
         TreeBigDead = content.Load(new TextureContent("content/tree_big_dead.png"));
         WinFlag = content.Load(new TextureContent("content/win_flag.png"));
         MenuBackground = content.Load(new TextureContent("content/menu_background.png"));
-        Player = content.Load(new TextureContent("content/player.png")); 
         Fontoe = content.Load(new FontContent("content/fontoe.ttf"));
     }
 }
