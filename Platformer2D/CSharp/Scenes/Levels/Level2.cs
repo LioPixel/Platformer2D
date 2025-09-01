@@ -4,7 +4,7 @@ namespace Platformer2D.CSharp.Scenes.Levels;
 
 public class Level2 : LevelScene
 {
-    public Level2(string name) : base(name) { }
+    public Level2() : base("Level 2") { }
     
     protected override void Init()
     {
@@ -28,11 +28,11 @@ public class Level2 : LevelScene
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level3("Level3"));
+        SceneManager.SetScene(new Level3());
     }
     
     public override void OnLevelReset()
     {
-        SceneManager.SetScene(new Level2("Level2"));
+        SceneManager.SetScene(new Level2());
     }
 }

@@ -29,8 +29,6 @@ public class Player : Entity
     private int _frame;
     private float _frameTime = 0.1f;
     private bool _isJumping;
-    private float _jumpTime = 0.8F;
-    
     private const int TotalFrames = 8;
     
     private readonly HashSet<ulong> _groundContacts = new();
@@ -258,7 +256,6 @@ public class Player : Entity
         if ((e.SensorShape.UserData?.ToString() == "PlayerLeftSensor") ||
             e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor")
         {
-            Logger.Error("LEFT WALLL");
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
         
@@ -266,7 +263,6 @@ public class Player : Entity
         if ((e.SensorShape.UserData?.ToString() == "PlayerRightSensor") ||
             e.VisitorShape.UserData?.ToString() == "PlayerRightSensor")
         {
-            Logger.Error("RIGHT WALLL");
             _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
     }
@@ -278,7 +274,6 @@ public class Player : Entity
         _leftContacts.Remove(key);
         _rightContacts.Remove(key);
         
-        Logger.Error("Test");
     }
 
     private void ContactBeginTouch(ContactBeginTouchEvent e)

@@ -7,7 +7,7 @@ namespace Platformer2D.CSharp.Scenes.Levels;
 public class Level5 : LevelScene
 {
     
-    public Level5(string name) : base(name) {}
+    public Level5() : base("Level 5") {}
     
     protected override void Init()
     {
@@ -17,20 +17,20 @@ public class Level5 : LevelScene
         this.CreatePlatform(0, 0, 2); 
         this.CreatePlatform(5, -1, 3); 
         this.CreateStair(11, -1, 3, StairType.Up); 
-        this.CreatePlatform(19, -3, 3);
+        this.CreatePlatform(17, -3, 5);
         this.CreatePortal(26, 0, 0, -2, Color.DarkRed);
         this.CreatePlatform(25, -4, 3);
-        this.CreatePlatform(32, -5, 2);
-        this.CreatePlatform(38, -6, 2);
+        this.CreatePlatform(31, -5, 2);
+        this.CreatePlatform(36, -6, 2);
     }
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level1("Level1"));
+        SceneManager.SetScene(new Level1());
     }
 
     public override void OnLevelReset()
     {
-        SceneManager.SetScene(new Level5("Level5"));
+        SceneManager.SetScene(new Level5());
     }
 }
