@@ -36,6 +36,8 @@ public class Player : Entity
     private readonly HashSet<ulong> _leftContacts = new();
     private readonly HashSet<ulong> _rightContacts = new();
     
+    private Vector2 _previousPlatformVelocity;
+    
     public Player(Transform transform) : base(transform, "player") { }
 
     protected override void Init()
@@ -233,6 +235,18 @@ public class Player : Entity
             this._isJumping = true;
         }
 
+        Vector2 platformVelocity = Vector2.Zero;
+        
+        foreach (ContactData contact in body.Contacts) {
+            if (contact.ShapeA.UserData?.ToString() == "MovingBlock") {
+                platformVelocity.X = contact.ShapeA.Body.LinearVelocity.X;
+            }
+            if (contact.ShapeB.UserData?.ToString() == "MovingBlock") {
+                platformVelocity.X = contact.ShapeB.Body.LinearVelocity.X;
+            }
+            break;
+        }
+        
         body.LinearVelocity = velocity;
         
         // Game over!
@@ -241,7 +255,7 @@ public class Player : Entity
         // Set sprite type.
         this.SetSpriteByPoseType();
     }
-    
+
     public void GameOver()
     {
         if (this.Transform.Translation.Y >= 5 * 16)

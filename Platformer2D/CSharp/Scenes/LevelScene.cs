@@ -107,6 +107,13 @@ public abstract class LevelScene : Scene
         }
     }
 
+    protected void CreateMovingPlatform(int blockPosX, int blockPosY, int length, int targetBlockPosX, int targetBlockPosY, float speed) {
+        for (int i = 0; i < length; i++) {
+            MovingBlock movingBlock = new MovingBlock(blockPosX + i, blockPosY, targetBlockPosX + i, targetBlockPosY, speed);
+            this.AddEntity(movingBlock);
+        }
+    }
+
     protected void CreateStair(int blockPosX, int blockPosY, int length, StairType stairType)
     {
         for (int i = 0; i < length; i++)
@@ -205,7 +212,6 @@ public abstract class LevelScene : Scene
 
     protected void CreatePortal(int blockPosX, int blockPosY, int teleportPosX, int teleportPosY, Color? color = null)
     {
-        
         Portal portal = new Portal(new Transform() { Translation = new Vector3(blockPosX * 16, blockPosY * 16, 0) }, new Vector2(teleportPosX * 16, teleportPosY * 16), color);
         this.AddEntity(portal);
     }
