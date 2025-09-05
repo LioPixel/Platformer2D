@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using Box2D;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;

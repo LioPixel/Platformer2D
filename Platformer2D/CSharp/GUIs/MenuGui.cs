@@ -1,9 +1,7 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
-using Bliss.CSharp.Logging;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Windowing;
-using Platformer2D.CSharp.Scenes;
 using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
@@ -44,7 +42,7 @@ public class MenuGui : Gui
         LabelData rectangleButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
         
         this.AddElement("Test-Rectangle-Button", new RectangleButtonElement(rectangleButtonData, rectangleButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
-            SceneManager.SetScene(new Level1());
+            SceneManager.SetScene(new Level7());
             GuiManager.SetGui(null);
             return true;
         }));

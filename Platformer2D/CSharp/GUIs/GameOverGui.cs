@@ -1,9 +1,7 @@
 ﻿using System.Numerics;
-using System.Runtime.CompilerServices;
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Transformations;
 using Platformer2D.CSharp.Scenes;
-using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -33,7 +31,6 @@ public class GameOverGui : Gui
             GuiManager.SetGui(new MenuGui());
             return true;
         }));
-        
         // Reset button.
         RectangleButtonData resetButtonData = new RectangleButtonData(Color.Orange, Color.LightOrange, 5, Color.DarkOrange, Color.Orange);
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);

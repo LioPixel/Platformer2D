@@ -9,6 +9,7 @@ namespace Platformer2D.CSharp;
 public class ContentRegistry : Registry {
     
     public static Texture2D Sprite { get; private set; }
+    public static Texture2D Button { get; private set; }
     public static Texture2D PlayerIdleLeft { get; private set; }
     public static Texture2D PlayerIdleRight { get; private set; }
     public static Texture2D PlayerJumpLeft { get; private set; }
@@ -46,6 +47,7 @@ public class ContentRegistry : Registry {
         base.Load(content);
         
         Sprite = content.Load(new TextureContent("content/sprite.png"));
+        Button = content.Load(new TextureContent("content/button.png"));
         Background = content.Load(new TextureContent("content/background.png"));
         PlayerIdleLeft = content.Load(new TextureContent("content/player/idle_left.png"));
         PlayerIdleRight = content.Load(new TextureContent("content/player/idle_right.png"));

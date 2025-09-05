@@ -1,5 +1,4 @@
-﻿using Bliss.CSharp.Textures;
-using Sparkle.CSharp.Scenes;
+﻿using Sparkle.CSharp.Scenes;
 
 namespace Platformer2D.CSharp.Scenes.Levels;
 
