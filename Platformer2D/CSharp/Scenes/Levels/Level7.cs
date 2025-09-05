@@ -24,7 +24,6 @@ public class Level7 : LevelScene
         this.CreatePlantSunFlower(11,1);
         this.CreateBushDead(15,1);
         this.CreatePlatform(15,2,1);
-        this.CreateTreeDead(20,1);
         this.CreatePlatform(20,2,1);
         this.CreateRockWithGrass(25,1);
         this.CreatePlatform(25,2,1);
@@ -55,7 +54,7 @@ public class Level7 : LevelScene
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level1());
+        SceneManager.SetScene(new Level8());
     }
 
     public override void OnLevelReset()
