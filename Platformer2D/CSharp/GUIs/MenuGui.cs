@@ -3,6 +3,7 @@ using Bliss.CSharp.Colors;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Windowing;
 using Platformer2D.CSharp.Scenes.Levels;
+using Sparkle.CSharp;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -34,16 +35,38 @@ public class MenuGui : Gui
         LabelData creditsLabelData = new LabelData(ContentRegistry.Fontoe, creditsText, 18, color: Color.White);
         this.AddElement("Credits-Label", new LabelElement(creditsLabelData, Anchor.BottomLeft, new Vector2(10, -10)));
         
+        // Button color.
+        Color lightPurpleColor = new Color(147, 112, 219, 180);
+        Color purpleColor = new Color(128, 0, 128, 180);
+        Color darkPurpleColor = new Color(75, 0, 130, 180);
+        
         // Rectangle button.
-        Color lightOrangeColor = new Color(147, 112, 219, 180);
-        Color orangeColor = new Color(128, 0, 128, 180);
-        Color darkColor = new Color(75, 0, 130, 180);
-        RectangleButtonData rectangleButtonData = new RectangleButtonData(lightOrangeColor, lightOrangeColor, 5, darkColor, orangeColor);
+        RectangleButtonData rectangleButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
         LabelData rectangleButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
         
         this.AddElement("Test-Rectangle-Button", new RectangleButtonElement(rectangleButtonData, rectangleButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
-            SceneManager.SetScene(new Level8());
+            SceneManager.SetScene(new Level9());
             GuiManager.SetGui(null);
+            return true;
+        }));
+        
+        // Options button.
+        RectangleButtonData optionsButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
+        
+        this.AddElement("Options-Button", new RectangleButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {
+            GuiManager.SetGui(new OptionsGui());
+            return true;
+        }));
+        
+                
+        // Exit button.
+        RectangleButtonData exitButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        LabelData exitButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Exit", 18, hoverColor: Color.White);
+        
+        this.AddElement("Exit-Button", new RectangleButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 120), new Vector2(300, 50), rotation: 0, clickFunc: () =>
+        {
+            ((PlatformerGame) Game.Instance!).ShouldClose = true;
             return true;
         }));
     }

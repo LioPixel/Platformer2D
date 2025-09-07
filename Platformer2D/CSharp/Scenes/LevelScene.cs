@@ -1,14 +1,18 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Camera.Dim2;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Interact;
+using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
 using Box2D;
 using Platformer2D.CSharp.Entities;
+using Platformer2D.CSharp.GUIs;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
 using Sparkle.CSharp.Graphics;
+using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
@@ -69,6 +73,19 @@ public abstract class LevelScene : Scene
         if (this.WonLevel)
         {
             this.OnLevelWon();
+        }
+    }
+
+    protected override void AfterUpdate(double delta)
+    {
+        base.AfterUpdate(delta);
+        
+        if (GuiManager.ActiveGui == null)
+        {
+            if (Input.IsKeyPressed(KeyboardKey.P))
+            {
+                GuiManager.SetGui(new OptionsGui());
+            }
         }
     }
 

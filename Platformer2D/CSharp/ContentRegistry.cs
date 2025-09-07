@@ -1,5 +1,6 @@
 using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Textures;
+using MiniAudioEx;
 using Sparkle.CSharp.Content;
 using Sparkle.CSharp.Content.Types;
 using Sparkle.CSharp.Registries;
@@ -9,6 +10,10 @@ namespace Platformer2D.CSharp;
 public class ContentRegistry : Registry {
     
     public static Texture2D Sprite { get; private set; }
+    public static AudioClip Jump { get; private set; }
+    public static Texture2D Speed { get; private set; }
+    public static Texture2D ToggleBackground { get; private set; }
+    public static Texture2D ToggleCheckmark { get; private set; }
     public static Texture2D Button { get; private set; }
     public static Texture2D PlayerIdleLeft { get; private set; }
     public static Texture2D PlayerIdleRight { get; private set; }
@@ -47,6 +52,10 @@ public class ContentRegistry : Registry {
         base.Load(content);
         
         Sprite = content.Load(new TextureContent("content/sprite.png"));
+        Jump = content.Load(new AudioClipContent("content/jump.mp3"));
+        ToggleBackground = content.Load(new TextureContent("content/toggle_background.png"));
+        ToggleCheckmark = content.Load(new TextureContent("content/toggle_checkmark.png"));
+        Speed = content.Load(new TextureContent("content/speed.png"));
         Button = content.Load(new TextureContent("content/button.png"));
         Background = content.Load(new TextureContent("content/background.png"));
         PlayerIdleLeft = content.Load(new TextureContent("content/player/idle_left.png"));

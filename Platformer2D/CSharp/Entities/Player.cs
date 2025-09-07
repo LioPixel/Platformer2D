@@ -4,6 +4,7 @@ using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Logging;
 using Bliss.CSharp.Transformations;
 using Box2D;
+using MiniAudioEx;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes;
 using Sparkle.CSharp;
@@ -30,6 +31,7 @@ public class Player : Entity
     private float _frameTime = 0.1f;
     private bool _isJumping;
     private const int TotalFrames = 8;
+    private AudioSource _audioSource;
     
     private readonly HashSet<ulong> _groundContacts = new();
     
@@ -83,7 +85,11 @@ public class Player : Entity
         ((Simulation2D) this.Scene.Simulation).ContactEndTouch += this.ContactEndTouch;
         ((Simulation2D) this.Scene.Simulation).SensorBeginTouch += this.ContactBeginSensorTouch;
         ((Simulation2D) this.Scene.Simulation).SensorEndTouch += this.ContactEndSensorTouch;
+
+        this._audioSource = new AudioSource();
     }
+    
+    
 
     protected override void Update(double delta)
     {
@@ -147,94 +153,99 @@ public class Player : Entity
         }
         
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
-
-        // --- PLAYER MOVEMENT ---
-        float groundAccel = 3f;    // how fast player accelerates on ground
-        float airAccel = 0.5f;     // how fast player accelerates in air
-        float maxSpeed = 50f;      // max horizontal speed
-        float jumpForce = 90;
-
         Vector2 velocity = body.LinearVelocity;
-        
-        // Horizontal input
-        float input = 0f;
-        if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
-        {
-            input -= 1f;
-            if (!_isJumping && isGround)
-            {
-                this._frameTime = 0.1F;
-                this.PoseType = PlayerPoseType.LeftWalk;
-            }
-        }
 
-        if ((Input.IsKeyDown(KeyboardKey.D) || Input.IsKeyDown(KeyboardKey.Right)) && !isRightWallCol)
+        if (GuiManager.ActiveGui == null)
         {
-            input += 1f;
-            if (!_isJumping && isGround)
-            {
-                this._frameTime = 0.1F;
-                this.PoseType = PlayerPoseType.RightWalk;
-            }
-        }
-        
-        if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) && !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
-        {
-            if (!this._isJumping)
-            {
-                if (this.PoseType == PlayerPoseType.LeftWalk)
-                {
-                    this._frameTime = 0.2F;
-                    this.PoseType = PlayerPoseType.LeftIdle;
-                }
-                if (this.PoseType == PlayerPoseType.RightWalk)
-                {
-                    this._frameTime = 0.2F;
-                    this.PoseType = PlayerPoseType.RightIdle;
-                }
-            }
-        }
-
-        if (input != 0f)
-        {
-            // pick acceleration based on grounded state
-            float accel = isGround ? groundAccel : airAccel;
-
-            // accelerate towards desired direction
-            velocity.X += input * accel;
-
-            // clamp max horizontal speed
-            velocity.X = Math.Clamp(velocity.X, -maxSpeed, maxSpeed);
-        }
-        else if (isGround)
-        {
-            // simple friction on ground when no input
-            velocity.X *= 0.8f;
-        }
-
-        // Jump
-        if (Input.IsKeyPressed(KeyboardKey.Space) && isGround && !_isJumping)
-        {
-            velocity.Y = -jumpForce; // usually negative Y is upward
+            // --- PLAYER MOVEMENT ---
+            float groundAccel = 3f;    // how fast player accelerates on ground
+            float airAccel = 0.5f;     // how fast player accelerates in air
+            float maxSpeed = 50f;      // max horizontal speed
+            float jumpForce = 90;
             
-            if (this.PoseType == PlayerPoseType.LeftWalk || this.PoseType == PlayerPoseType.LeftIdle)
+            // Horizontal input
+            float input = 0f;
+            if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
             {
-                this._frameTime = 0.1F;
-                this._timer = 0;
-                this._frame = 0;
-                this.PoseType = PlayerPoseType.JumpLeft;
+                input -= 1f;
+                if (!_isJumping && isGround)
+                {
+                    this._frameTime = 0.1F;
+                    this.PoseType = PlayerPoseType.LeftWalk;
+                }
             }
-            if (this.PoseType == PlayerPoseType.RightWalk || this.PoseType == PlayerPoseType.RightIdle)
+    
+            if ((Input.IsKeyDown(KeyboardKey.D) || Input.IsKeyDown(KeyboardKey.Right)) && !isRightWallCol)
             {
-                this._frameTime = 0.1F;
-                this._timer = 0;
-                this._frame = 0;
-                this.PoseType = PlayerPoseType.JumpRight;
+                input += 1f;
+                if (!_isJumping && isGround)
+                {
+                    this._frameTime = 0.1F;
+                    this.PoseType = PlayerPoseType.RightWalk;
+                }
             }
-
-            this._isJumping = true;
+            
+            if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) && !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
+            {
+                if (!this._isJumping)
+                {
+                    if (this.PoseType == PlayerPoseType.LeftWalk)
+                    {
+                        this._frameTime = 0.2F;
+                        this.PoseType = PlayerPoseType.LeftIdle;
+                    }
+                    if (this.PoseType == PlayerPoseType.RightWalk)
+                    {
+                        this._frameTime = 0.2F;
+                        this.PoseType = PlayerPoseType.RightIdle;
+                    }
+                }
+            }
+    
+            if (input != 0f)
+            {
+                // pick acceleration based on grounded state
+                float accel = isGround ? groundAccel : airAccel;
+    
+                // accelerate towards desired direction
+                velocity.X += input * accel;
+    
+                // clamp max horizontal speed
+                velocity.X = Math.Clamp(velocity.X, -maxSpeed, maxSpeed);
+            }
+            else if (isGround)
+            {
+                // simple friction on ground when no input
+                velocity.X *= 0.8f;
+            }
+    
+            // Jump
+            if (Input.IsKeyPressed(KeyboardKey.Space) && isGround && !_isJumping)
+            {
+                velocity.Y = -jumpForce; // usually negative Y is upward
+                
+                if (this.PoseType == PlayerPoseType.LeftWalk || this.PoseType == PlayerPoseType.LeftIdle)
+                {
+                    this._frameTime = 0.1F;
+                    this._timer = 0;
+                    this._frame = 0;
+                    this.PoseType = PlayerPoseType.JumpLeft;
+                }
+                if (this.PoseType == PlayerPoseType.RightWalk || this.PoseType == PlayerPoseType.RightIdle)
+                {
+                    this._frameTime = 0.1F;
+                    this._timer = 0;
+                    this._frame = 0;
+                    this.PoseType = PlayerPoseType.JumpRight;
+                }
+    
+                this._isJumping = true;
+                
+                this._audioSource.Play(ContentRegistry.Jump);
+                
+            }
         }
-
+        
         Vector2 platformVelocity = Vector2.Zero;
         
         foreach (ContactData contact in body.Contacts) {

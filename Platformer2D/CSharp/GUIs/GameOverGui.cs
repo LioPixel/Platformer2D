@@ -21,9 +21,14 @@ public class GameOverGui : Gui
         
         LabelData labelData = new LabelData(ContentRegistry.Fontoe, "GAME OVER!", 18, scale: new Vector2(5, 5));
         this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100)));
+        
+        // Button color.
+        Color lightPurpleColor = new Color(147, 112, 219, 180);
+        Color purpleColor = new Color(128, 0, 128, 180);
+        Color darkPurpleColor = new Color(75, 0, 130, 180);
  
         // Menu button.
-        RectangleButtonData menuButtonData = new RectangleButtonData(Color.Orange, Color.LightOrange, 5, Color.DarkOrange, Color.Orange);
+        RectangleButtonData menuButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
         this.AddElement("Menu-Button", new RectangleButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
@@ -31,8 +36,9 @@ public class GameOverGui : Gui
             GuiManager.SetGui(new MenuGui());
             return true;
         }));
+        
         // Reset button.
-        RectangleButtonData resetButtonData = new RectangleButtonData(Color.Orange, Color.LightOrange, 5, Color.DarkOrange, Color.Orange);
+        RectangleButtonData resetButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
         this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {

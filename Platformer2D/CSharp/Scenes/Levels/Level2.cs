@@ -18,7 +18,7 @@ public class Level2 : LevelScene
         this.CreatePlatform(11, 0, 3);
         this.CreatePlantSunFlower(11, -1);
         this.CreateBushDead(13, -1);
-        this.CreateMovingPlatform(14, 0, 2, 18, -1, 1);
+        this.CreateMovingPlatform(15, 0, 2, 17, -1, 1);
         this.CreatePlatform(20, -1, 2);
         this.CreateRockWithGrass(21, -2);
         this.CreatePlatform(23, 0, 6);
