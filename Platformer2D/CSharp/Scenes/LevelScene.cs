@@ -54,6 +54,18 @@ public abstract class LevelScene : Scene
     {
         base.Update(delta);
         
+        if (SceneManager.ActiveScene != null)
+        {
+            if (GuiManager.ActiveGui == null)
+            {
+                if (Input.IsKeyPressed(KeyboardKey.Escape))
+                {
+                    GuiManager.SetGui(new PauseMenuGui());
+                }
+            }
+        }
+
+        
         Camera2D? cam2D = SceneManager.ActiveCam2D;
 
         if (cam2D == null)
@@ -79,14 +91,6 @@ public abstract class LevelScene : Scene
     protected override void AfterUpdate(double delta)
     {
         base.AfterUpdate(delta);
-        
-        if (GuiManager.ActiveGui == null)
-        {
-            if (Input.IsKeyPressed(KeyboardKey.P))
-            {
-                GuiManager.SetGui(new OptionsGui());
-            }
-        }
     }
 
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)

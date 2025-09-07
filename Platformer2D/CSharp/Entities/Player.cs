@@ -240,9 +240,11 @@ public class Player : Entity
                 }
     
                 this._isJumping = true;
-                
-                this._audioSource.Play(ContentRegistry.Jump);
-                
+
+                if (((PlatformerGame)Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"))
+                {
+                    this._audioSource.Play(ContentRegistry.Jump);
+                }
             }
         }
         

@@ -54,6 +54,15 @@ public class OptionsGui : Gui
             ((PlatformerGame) Game.Instance!).OptionsConfig.SetValue("DebugMode", condition);
             return true;
         }));
+        
+        // Toggle Sound.
+        ToggleData toggleDataSound = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, backgroundHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
+        LabelData toggleLabelDataSound = new LabelData(ContentRegistry.Fontoe, "Sounds", 18);
+        
+        this.AddElement("Toggle-Sounds", new ToggleElement(toggleDataSound, toggleLabelDataSound, Anchor.Center, new Vector2(0, -20), 5, toggleState: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"), clickFunc: () => {
+            ((PlatformerGame) Game.Instance).OptionsConfig.SetValue("Sounds", !((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"));
+            return true;
+        }));
     }
 
     protected override void Update(double delta)
@@ -69,7 +78,7 @@ public class OptionsGui : Gui
             }
             else
             {
-                GuiManager.SetGui(null);
+                GuiManager.SetGui(new PauseMenuGui());
             }
         }
     }
@@ -94,6 +103,7 @@ public class OptionsGui : Gui
         
         context.PrimitiveBatch.Begin(context.CommandList, framebuffer.OutputDescription);
         context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(pos.X, pos.Y, size.X, size.Y), color: new Color(128, 128, 128, 128));
+        context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(0, 0, GlobalGraphicsAssets.Window.GetWidth(), GlobalGraphicsAssets.Window.GetHeight()), color: new Color(128, 128, 128, 128));
         context.PrimitiveBatch.DrawEmptyRectangle(new RectangleF(pos.X, pos.Y, size.X, size.Y), 4, color: new Color(64, 64, 64, 128));
         context.PrimitiveBatch.End();
         

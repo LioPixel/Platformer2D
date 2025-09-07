@@ -1,5 +1,7 @@
-﻿using Platformer2D.CSharp.GUIs;
+﻿using Assimp;
+using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Overlays;
+using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Content;
 using Sparkle.CSharp.Graphics;
@@ -7,6 +9,8 @@ using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.IO.Configs.Json;
 using Sparkle.CSharp.Overlays;
 using Sparkle.CSharp.Registries;
+using Sparkle.CSharp.Scenes;
+using Scene = Sparkle.CSharp.Scenes.Scene;
 
 namespace Platformer2D.CSharp;
 
@@ -19,6 +23,7 @@ public class PlatformerGame : Game
         JsonConfigBuilder jsonConfigBuilder = new JsonConfigBuilder("configs", "options");
         jsonConfigBuilder.Add("Vsync", false);
         jsonConfigBuilder.Add("DebugMode", false);
+        jsonConfigBuilder.Add("Sounds", true);
         this.OptionsConfig = jsonConfigBuilder.Build();
     }
 
