@@ -15,7 +15,7 @@ public class Level8 : LevelScene
     protected override void Init()
     {
         base.Init();
-        this.Background = ContentRegistry.Background9;
+        this.Background = ContentRegistry.Background8;
         
         this.CreatePlatform(0,0,1);
         this.CreateBushDead(0,-1);

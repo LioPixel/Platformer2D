@@ -220,8 +220,10 @@ public class Player : Entity
             }
     
             // Jump
-            if (Input.IsKeyPressed(KeyboardKey.Space) && isGround && !_isJumping)
-            {
+            if ((Input.IsKeyPressed(KeyboardKey.Space) 
+                 || Input.IsKeyPressed(KeyboardKey.W)
+                 || Input.IsKeyPressed(KeyboardKey.Up))
+                && isGround && !_isJumping)            {
                 velocity.Y = -jumpForce; // usually negative Y is upward
                 
                 if (this.PoseType == PlayerPoseType.LeftWalk || this.PoseType == PlayerPoseType.LeftIdle)
@@ -247,19 +249,7 @@ public class Player : Entity
                 }
             }
         }
-        
-        Vector2 platformVelocity = Vector2.Zero;
-        
-        foreach (ContactData contact in body.Contacts) {
-            if (contact.ShapeA.UserData?.ToString() == "MovingBlock") {
-                platformVelocity.X = contact.ShapeA.Body.LinearVelocity.X;
-            }
-            if (contact.ShapeB.UserData?.ToString() == "MovingBlock") {
-                platformVelocity.X = contact.ShapeB.Body.LinearVelocity.X;
-            }
-            break;
-        }
-        
+
         body.LinearVelocity = velocity;
         
         // Game over!
@@ -267,6 +257,26 @@ public class Player : Entity
         
         // Set sprite type.
         this.SetSpriteByPoseType();
+    }
+
+    protected override void FixedUpdate(double fixedStep)
+    {
+        base.FixedUpdate(fixedStep);
+    
+        RigidBody2D body = this.GetComponent<RigidBody2D>()!;
+    
+        Vector2 platformVelocity = Vector2.Zero;
+
+        foreach (ContactData contact in body.Contacts) {
+            if (contact.ShapeA.UserData?.ToString() == "MovingBlock") {
+                platformVelocity = contact.ShapeA.Body.LinearVelocity;
+            }
+            else if (contact.ShapeB.UserData?.ToString() == "MovingBlock") {
+                platformVelocity = contact.ShapeB.Body.LinearVelocity;
+            }
+        }
+    
+        body.LinearVelocity += new Vector2(platformVelocity.X, 0);
     }
 
     public void GameOver()

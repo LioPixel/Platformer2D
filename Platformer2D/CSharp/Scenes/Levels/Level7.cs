@@ -47,7 +47,7 @@ public class Level7 : LevelScene
         this.CreatePlatform(87, -2, 1);
         this.CreatePlatform(90,-1,1);
         this.CreatePlatform(93,-2,1);
-        this.CreateStair(95,-3,3, StairType.Up);
+        this.CreateStair(95,-3,3,StairType.Up);
         this.CreateBushDead(96,-5);
         this.CreateWinFlag(102,-6);
     }

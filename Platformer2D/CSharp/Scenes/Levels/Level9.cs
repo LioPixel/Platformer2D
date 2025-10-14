@@ -17,7 +17,7 @@ public class Level9 : LevelScene
     protected override void Init()
     {
         base.Init();
-        this.Background = ContentRegistry.Background9;
+        this.Background = ContentRegistry.Background7;
         this.CreatePlatform(0,0,1);
         this.CreateMovingPlatform(3,0,2,10,0,1);
         this.CreatePlatform(14,0,2);
@@ -29,11 +29,20 @@ public class Level9 : LevelScene
         this.CreatePlatform(30,-5,3);
         this.CreatePlatform(37,-5,1);
         this.CreateStair(41,-6,5,StairType.Up);
+        this.CreatePlatform(49,-10,1);
+        this.CreatePortal(53,-11,45,-13);
+        this.CreatePortal(53,-7,47,3);
+        this.CreatePlatform(47,5,1);
+        this.CreateWinFlag(51,4);
+        this.CreatePlantSunFlower(15,-1);
+        this.CreateRockWithGrass(24,-11);
+        this.CreateBush(29,-13);
+        this.CreateFlowerOrange(43,-9);
     }
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level1());
+        SceneManager.SetScene(new Level10());
     }
 
     public override void OnLevelReset()

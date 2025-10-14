@@ -37,7 +37,7 @@ public class OptionsGui : Gui
         ToggleData toggleDataVsync = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, backgroundHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData toggleLabelDataVsync = new LabelData(ContentRegistry.Fontoe, "V-Sync", 18);
         
-        this.AddElement("Toggle-Vsync", new ToggleElement(toggleDataVsync, toggleLabelDataVsync, Anchor.Center, new Vector2(0, -120), 5, toggleState: GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank, clickFunc: () => {
+        this.AddElement("Toggle-Vsync", new ToggleElement(toggleDataVsync, toggleLabelDataVsync, Anchor.Center, new Vector2(-5, -120), 5, toggleState: GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank, clickFunc: () => {
             GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank = !GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank;
             ((PlatformerGame) Game.Instance!).OptionsConfig.SetValue("Vsync", GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank);
             return true;
@@ -47,7 +47,7 @@ public class OptionsGui : Gui
         ToggleData debugModeToggleData = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, backgroundHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData debugModeToggleLabelData = new LabelData(ContentRegistry.Fontoe, "Debug Mode", 18);
         
-        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(0, -70), 5, toggleState: OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled, clickFunc: () =>
+        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(19, -70), 5, toggleState: OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled, clickFunc: () =>
         {
             bool condition = !OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled;
             OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled = condition;

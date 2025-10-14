@@ -45,7 +45,7 @@ public class MenuGui : Gui
         LabelData rectangleButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
         
         this.AddElement("Test-Rectangle-Button", new RectangleButtonElement(rectangleButtonData, rectangleButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
-            SceneManager.SetScene(new Level9());
+            SceneManager.SetScene(new Level1());
             GuiManager.SetGui(null);
             return true;
         }));
