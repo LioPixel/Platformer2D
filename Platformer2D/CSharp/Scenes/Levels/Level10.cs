@@ -29,6 +29,8 @@ public class Level10 : LevelScene
         this.CreateStair(71,-12,4,StairType.Down);
         this.CreatePlatform(79,-9,3); 
         this.CreateStair(84,-10,4,StairType.Up);
+        this.CreateStair(91,-12,3,StairType.Down);
+        this.CreateMovingPlatform(97,-10,2,104,-10,2);
     }
 
     protected override void OnLevelWon()
