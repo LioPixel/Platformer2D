@@ -24,8 +24,8 @@ public class PauseMenuGui : Gui
         base.Init();
         this._opendRightNow = true;
         
-        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Pause Menu", 18, scale: new Vector2(5, 5));
-        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100)));
+        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Pause Menu", 18);
+        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
         
         // Button color.
         Color lightPurpleColor = new Color(147, 112, 219, 180);
@@ -33,29 +33,29 @@ public class PauseMenuGui : Gui
         Color darkPurpleColor = new Color(75, 0, 130, 180);
  
         // Menu button.
-        RectangleButtonData menuButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        TextureButtonData menuButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
-        this.AddElement("Menu-Button", new RectangleButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Exit-Button", new TextureButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, new Vector2(0, 0), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
             SceneManager.SetScene(null);
             GuiManager.SetGui(new MenuGui());
             return true;
         }));
         
         // Options button.
-        RectangleButtonData optionsButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
         
-        this.AddElement("Options-Button", new RectangleButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
             GuiManager.SetGui(new OptionsGui());
             return true;
         }));
         
         // Reset button.
-        RectangleButtonData resetButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        TextureButtonData resetButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
-        this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 120), new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Reset-Button", new TextureButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
             if (SceneManager.ActiveScene is LevelScene level)
             {
                 level.OnLevelReset();

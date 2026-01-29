@@ -21,8 +21,8 @@ public class GameWonGui : Gui
     {
         base.Init();
         
-        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Level Won!", 18, scale: new Vector2(5, 5));
-        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100)));
+        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Level Won!", 18);
+        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
         
         // Button color.
         Color lightPurpleColor = new Color(147, 112, 219, 180);
@@ -30,7 +30,7 @@ public class GameWonGui : Gui
         Color darkPurpleColor = new Color(75, 0, 130, 180);
  
         // Menu button.
-        RectangleButtonData menuButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        RectangleButtonData menuButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, null, 5, darkPurpleColor, purpleColor);
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
         this.AddElement("Menu-Button", new RectangleButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
@@ -40,7 +40,7 @@ public class GameWonGui : Gui
         }));
         
         // Reset button.
-        RectangleButtonData resetButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        RectangleButtonData resetButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, null, 5, darkPurpleColor, purpleColor);
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
         this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {

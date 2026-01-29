@@ -20,12 +20,14 @@ public class MenuGui : Gui
     protected override void Init()
     {
         base.Init();
+
+        GuiManager.Scale = 1.25F; 
         
-        LabelData fullscreen = new LabelData(ContentRegistry.Fontoe, "please go to full screen", 18, color: Color.White, scale: new Vector2(1.5F, 1.5F));
-        this.AddElement("fullscreen", new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0))); 
+        LabelData fullscreen = new LabelData(ContentRegistry.Fontoe, "please go to full screen", 18, color: Color.White);
+        this.AddElement("fullscreen", new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0), new Vector2(1.5F, 1.5F))); 
         
-        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Platformer2D", 18, scale: new Vector2(5, 5));
-        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100)));
+        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Platformer2D", 18);
+        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
 
         string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace: JUMP";
         LabelData controlLabelData = new LabelData(ContentRegistry.Fontoe, controlText, 18, color: Color.White);
@@ -40,33 +42,118 @@ public class MenuGui : Gui
         Color purpleColor = new Color(128, 0, 128, 180);
         Color darkPurpleColor = new Color(75, 0, 130, 180);
         
-        // Rectangle button.
-        RectangleButtonData rectangleButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
-        LabelData rectangleButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
+        // Texture drop down.
+        TextureDropDownData selectionDropDownData = new TextureDropDownData(
+            ContentRegistry.UiButton,
+            ContentRegistry.UiMenu,
+            ContentRegistry.UiArrow,
+            fieldResizeMode: ResizeMode.NineSlice,
+            menuResizeMode: ResizeMode.NineSlice,
+            fieldBorderInsets: new BorderInsets(12),
+            menuBorderInsets: new BorderInsets(5),
+            fieldHoverColor: Color.Gray,
+            menuHoverColor: Color.Gray,
+            arrowHoverColor: Color.Gray
+        );
         
-        this.AddElement("Test-Rectangle-Button", new RectangleButtonElement(rectangleButtonData, rectangleButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
-            SceneManager.SetScene(new Level10());
+        List<LabelData> options = [
+            new LabelData(ContentRegistry.Fontoe, "Level 1", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 2", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 3", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 4", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 5", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 6", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 7", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 8", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 9", 18),
+            new LabelData(ContentRegistry.Fontoe, "Level 10", 18)
+        ];
+        
+        TextureDropDownElement dropDownElement = new TextureDropDownElement(
+            selectionDropDownData,
+            options,
+            Anchor.Center,
+            new Vector2(200, 0),
+            size: new Vector2(120, 40),
+            scale: new Vector2(1, 1),
+            fieldTextOffset: new Vector2(10, 1),
+            menuTextOffset: new Vector2(10, 1),
+            clickFunc: () =>
+            {
+                return true;
+            });
+        
+        this.AddElement("Texture-Drop-Down", dropDownElement);
+        
+        // Texture button.
+        TextureButtonData textureButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        LabelData textureButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
+        
+        this.AddElement("Texture-Button", new TextureButtonElement(textureButtonData, textureButtonLabelData, Anchor.Center, Vector2.Zero, size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () =>
+        {
+            switch (dropDownElement.SelectedOption?.Text)
+            {
+                case "Level 1":
+                    SceneManager.SetScene(new Level1());
+                    break;
+                
+                case "Level 2":
+                    SceneManager.SetScene(new Level2());
+                    break;
+                
+                case "Level 3":
+                    SceneManager.SetScene(new Level3());
+                    break;
+                
+                case "Level 4":
+                    SceneManager.SetScene(new Level4());
+                    break;
+                
+                case "Level 5":
+                    SceneManager.SetScene(new Level5());
+                    break;
+                
+                case "Level 6":
+                    SceneManager.SetScene(new Level6());
+                    break;
+                
+                case "Level 7":
+                    SceneManager.SetScene(new Level7());
+                    break;
+                
+                case "Level 8":
+                    SceneManager.SetScene(new Level8());
+                    break;
+                
+                case "Level 9":
+                    SceneManager.SetScene(new Level9());
+                    break;
+                
+                case "Level 10":
+                    SceneManager.SetScene(new Level10());
+                    break;
+            }
+
             GuiManager.SetGui(null);
             return true;
         }));
         
         // Options button.
-        RectangleButtonData optionsButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
         
-        this.AddElement("Options-Button", new RectangleButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
             GuiManager.SetGui(new OptionsGui());
             return true;
         }));
         
-                
         // Exit button.
-        RectangleButtonData exitButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, 5, darkPurpleColor, purpleColor);
+        TextureButtonData exitButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData exitButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Exit", 18, hoverColor: Color.White);
         
-        this.AddElement("Exit-Button", new RectangleButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 120), new Vector2(300, 50), rotation: 0, clickFunc: () =>
+        this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () =>
         {
-            ((PlatformerGame) Game.Instance!).ShouldClose = true;
+            Game.Instance.ShouldClose = true;
             return true;
         }));
     }

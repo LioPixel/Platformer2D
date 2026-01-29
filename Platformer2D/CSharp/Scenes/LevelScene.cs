@@ -28,7 +28,7 @@ public abstract class LevelScene : Scene
     public Texture2D? Background;
     public bool WonLevel;
     
-    protected LevelScene(string name) : base(name, SceneType.Scene2D, new Simulation2D(new PhysicsSettings2D()
+    protected LevelScene(string name) : base(name, SceneType.Scene2D, null, () => new Simulation2D(new PhysicsSettings2D()
     {
         WorldDef = new WorldDef() 
         {

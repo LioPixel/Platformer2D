@@ -1,6 +1,6 @@
 using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Textures;
-using MiniAudioEx;
+using MiniAudioEx.Core.StandardAPI;
 using Sparkle.CSharp.Content;
 using Sparkle.CSharp.Content.Types;
 using Sparkle.CSharp.Registries;
@@ -45,6 +45,9 @@ public class ContentRegistry : Registry {
     public static Texture2D TreeBig { get; private set; }
     public static Texture2D WinFlag { get; private set; }
     public static Texture2D MenuBackground { get; private set; }
+    public static Texture2D UiArrow { get; private set; }
+    public static Texture2D UiMenu { get; private set; }
+    public static Texture2D UiButton { get; private set; }
     public static Font Fontoe { get; private set; }
 
     protected override void Load(ContentManager content)
@@ -87,6 +90,9 @@ public class ContentRegistry : Registry {
         TreeBigDead = content.Load(new TextureContent("content/tree_big_dead.png"));
         WinFlag = content.Load(new TextureContent("content/win_flag.png"));
         MenuBackground = content.Load(new TextureContent("content/menu_background.png"));
+        UiArrow = content.Load(new TextureContent("content/ui_arrow.png"));
+        UiMenu = content.Load(new TextureContent("content/ui_menu.png"));
+        UiButton = content.Load(new TextureContent("content/ui_button.png"));
         Fontoe = content.Load(new FontContent("content/fontoe.ttf"));
     }
 }

@@ -5,7 +5,8 @@ using Veldrid;
 GameSettings settings = new GameSettings()
 {
     VSync = false,
-    SampleCount = TextureSampleCount.Count8
+    SampleCount = TextureSampleCount.Count8,
+    IconPath = "content/icon.png"
 };
 
 using PlatformerGame game = new PlatformerGame(settings);

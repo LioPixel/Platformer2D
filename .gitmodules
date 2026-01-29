@@ -1,4 +1,3 @@
 [submodule "Sparkle"]
 	path = Sparkle
-	url = https://github.com/MrScautHD/Sparkle
-	branch = port-to-bliss
+	url = https://github.com/MrScautHD/Sparkle.git
