@@ -48,11 +48,6 @@ public class Level6 : LevelScene
         this.CreateStair(95,-3,3, StairType.Up);
         this.CreateBushDead(96,-5);
         this.CreateWinFlag(102,-6);
-
-
-
-
-
     }
 
     protected override void OnLevelWon()

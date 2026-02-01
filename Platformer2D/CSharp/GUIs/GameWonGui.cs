@@ -33,7 +33,7 @@ public class GameWonGui : Gui
         RectangleButtonData menuButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, null, 5, darkPurpleColor, purpleColor);
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
-        this.AddElement("Menu-Button", new RectangleButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Menu-Button", new RectangleButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, Vector2.Zero, new Vector2(300, 50), rotation: 0, clickFunc: (element) => {
             SceneManager.SetScene(null);
             GuiManager.SetGui(new MenuGui());
             return true;
@@ -43,7 +43,7 @@ public class GameWonGui : Gui
         RectangleButtonData resetButtonData = new RectangleButtonData(lightPurpleColor, lightPurpleColor, null, 5, darkPurpleColor, purpleColor);
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
-        this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: () => {
+        this.AddElement("Reset-Button", new RectangleButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 60), new Vector2(300, 50), rotation: 0, clickFunc: (element) => {
             if (SceneManager.ActiveScene is LevelScene level)
             {
                 level.OnLevelReset();

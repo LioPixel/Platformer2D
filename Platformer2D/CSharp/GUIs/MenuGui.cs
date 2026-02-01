@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Textures;
+using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
 using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp;
@@ -46,14 +47,17 @@ public class MenuGui : Gui
         TextureDropDownData selectionDropDownData = new TextureDropDownData(
             ContentRegistry.UiButton,
             ContentRegistry.UiMenu,
+            ContentRegistry.UiMenu,
+            ContentRegistry.UiSlider,
             ContentRegistry.UiArrow,
+            sliderBarSourceRect: new Rectangle(2, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height),
             fieldResizeMode: ResizeMode.NineSlice,
             menuResizeMode: ResizeMode.NineSlice,
+            sliderBarResizeMode: ResizeMode.NineSlice,
             fieldBorderInsets: new BorderInsets(12),
             menuBorderInsets: new BorderInsets(5),
-            fieldHoverColor: Color.Gray,
-            menuHoverColor: Color.Gray,
-            arrowHoverColor: Color.Gray
+            sliderBarBorderInsets: new BorderInsets(5),
+            fieldHoverColor: Color.Gray
         );
         
         List<LabelData> options = [
@@ -66,22 +70,33 @@ public class MenuGui : Gui
             new LabelData(ContentRegistry.Fontoe, "Level 7", 18),
             new LabelData(ContentRegistry.Fontoe, "Level 8", 18),
             new LabelData(ContentRegistry.Fontoe, "Level 9", 18),
-            new LabelData(ContentRegistry.Fontoe, "Level 10", 18)
+            new LabelData(ContentRegistry.Fontoe, "Level 10", 18),
         ];
         
         TextureDropDownElement dropDownElement = new TextureDropDownElement(
             selectionDropDownData,
             options,
+            4,
             Anchor.Center,
             new Vector2(200, 0),
             size: new Vector2(120, 40),
             scale: new Vector2(1, 1),
             fieldTextOffset: new Vector2(10, 1),
             menuTextOffset: new Vector2(10, 1),
-            clickFunc: () =>
-            {
-                return true;
-            });
+            sliderOffset: new Vector2(-1F, 0),
+            scrollMaskInsets: (3, 3)
+        );
+        
+        dropDownElement.MenuToggled += (isMenuOpen) => {
+            if (isMenuOpen) {
+                if (dropDownElement.Options.Count > dropDownElement.MaxVisibleOptions) {
+                    dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height);
+                } 
+            }
+            else {
+                dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width, (int) ContentRegistry.UiMenu.Height);
+            }
+        };
         
         this.AddElement("Texture-Drop-Down", dropDownElement);
         
@@ -89,7 +104,7 @@ public class MenuGui : Gui
         TextureButtonData textureButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData textureButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
         
-        this.AddElement("Texture-Button", new TextureButtonElement(textureButtonData, textureButtonLabelData, Anchor.Center, Vector2.Zero, size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () =>
+        this.AddElement("Texture-Button", new TextureButtonElement(textureButtonData, textureButtonLabelData, Anchor.Center, Vector2.Zero, size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
         {
             switch (dropDownElement.SelectedOption?.Text)
             {
@@ -138,11 +153,12 @@ public class MenuGui : Gui
             return true;
         }));
         
+        
         // Options button.
         TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
         
-        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
+        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
             GuiManager.SetGui(new OptionsGui());
             return true;
         }));
@@ -151,7 +167,7 @@ public class MenuGui : Gui
         TextureButtonData exitButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData exitButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Exit", 18, hoverColor: Color.White);
         
-        this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () =>
+        this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
         {
             Game.Instance.ShouldClose = true;
             return true;

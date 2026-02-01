@@ -1,4 +1,5 @@
 ﻿using Assimp;
+using MiniAudioEx.Core.StandardAPI;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Overlays;
 using Platformer2D.CSharp.Scenes.Levels;
@@ -24,6 +25,7 @@ public class PlatformerGame : Game
         jsonConfigBuilder.Add("Vsync", false);
         jsonConfigBuilder.Add("DebugMode", false);
         jsonConfigBuilder.Add("Sounds", true);
+        jsonConfigBuilder.Add("MasterVolume", 0.5F);
         this.OptionsConfig = jsonConfigBuilder.Build();
     }
 
@@ -41,6 +43,7 @@ public class PlatformerGame : Game
         base.Init();
         GuiManager.SetGui(new MenuGui());
         OverlayManager.AddOverlay(new DebugOverlay("Debug", this.OptionsConfig.GetValue<bool>("DebugMode")));
+        AudioContext.MasterVolume = ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<float>("MasterVolume");
     }
 
     protected override void Load(ContentManager content)

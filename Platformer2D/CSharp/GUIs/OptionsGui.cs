@@ -1,16 +1,17 @@
 ﻿using System.Numerics;
+using System.Reflection.Emit;
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
+using MiniAudioEx.Core.StandardAPI;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
-using Sparkle.CSharp.IO.Configs.Json;
 using Sparkle.CSharp.Overlays;
 using Sparkle.CSharp.Scenes;
 using Veldrid;
@@ -22,8 +23,6 @@ public class OptionsGui : Gui
     
     public OptionsGui() : base("Options")
     {
-        JsonConfigBuilder jsonConfigBuilder = new JsonConfigBuilder("configs", "options");
-        jsonConfigBuilder.Add("Vsync", false);
     }
 
     protected override void Init()
@@ -32,12 +31,27 @@ public class OptionsGui : Gui
         
         LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Options", 18);
         this.AddElement("Title", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 50), new Vector2(5, 5)));
+
+        TextureButtonData backButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        LabelData backButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Back", 18, hoverColor: Color.White);
+        
+        this.AddElement("Options-Button", new TextureButtonElement(backButtonData, backButtonLabelData, Anchor.Center, new Vector2(-200, -120), size: new Vector2(100, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
+            if (SceneManager.ActiveScene != null)
+            {
+                GuiManager.SetGui(new PauseMenuGui());
+            }
+            else
+            {
+                GuiManager.SetGui(new MenuGui());
+            }
+            return true;
+        }));
         
         // Toggle Vsync.
         ToggleData toggleDataVsync = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, checkboxHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData toggleLabelDataVsync = new LabelData(ContentRegistry.Fontoe, "V-Sync", 18);
         
-        this.AddElement("Toggle-Vsync", new ToggleElement(toggleDataVsync, toggleLabelDataVsync, Anchor.Center, new Vector2(-5, -120), 5, toggleState: GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank, clickFunc: () => {
+        this.AddElement("Toggle-Vsync", new ToggleElement(toggleDataVsync, toggleLabelDataVsync, Anchor.Center, new Vector2(-5, -120), 5, toggleState: GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank, clickFunc: (element) => {
             GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank = !GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank;
             ((PlatformerGame) Game.Instance!).OptionsConfig.SetValue("Vsync", GlobalGraphicsAssets.GraphicsDevice.SyncToVerticalBlank);
             return true;
@@ -47,7 +61,7 @@ public class OptionsGui : Gui
         ToggleData debugModeToggleData = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, checkboxHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData debugModeToggleLabelData = new LabelData(ContentRegistry.Fontoe, "Debug Mode", 18);
         
-        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(19, -70), 5, toggleState: OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled, clickFunc: () =>
+        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(19, -70), 5, toggleState: OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled, clickFunc: (element) =>
         {
             bool condition = !OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled;
             OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled = condition;
@@ -59,12 +73,28 @@ public class OptionsGui : Gui
         ToggleData toggleDataSound = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, checkboxHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData toggleLabelDataSound = new LabelData(ContentRegistry.Fontoe, "Sounds", 18);
         
-        this.AddElement("Toggle-Sounds", new ToggleElement(toggleDataSound, toggleLabelDataSound, Anchor.Center, new Vector2(0, -20), 5, toggleState: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"), clickFunc: () => {
+        this.AddElement("Toggle-Sounds", new ToggleElement(toggleDataSound, toggleLabelDataSound, Anchor.Center, new Vector2(0, -20), 5, toggleState: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"), clickFunc: (element) => {
             ((PlatformerGame) Game.Instance).OptionsConfig.SetValue("Sounds", !((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"));
             return true;
         }));
+        
+        LabelData masterVolumeLabelData = new LabelData(ContentRegistry.Fontoe, "Master Volume", 18);
+        this.AddElement("Master-Volume", new LabelElement(masterVolumeLabelData, Anchor.Center, new Vector2(0, 25)));
+        
+        // Texture slider bar.
+        TextureSlideBarData textureSlideBarData = new TextureSlideBarData(
+            ContentRegistry.UiBar,
+            null,
+            ContentRegistry.UiSliderLowRes,
+            barResizeMode: ResizeMode.NineSlice,
+            filledBarResizeMode: ResizeMode.NineSlice,
+            barBorderInsets: new BorderInsets(3),
+            filledBarBorderInsets: new BorderInsets(3));
+        
+        this.AddElement("Texture-Slider-Bar", new TextureSlideBarElement(textureSlideBarData, Anchor.Center, new Vector2(0, 50), 0, 1, value: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<float>("MasterVolume"), wholeNumbers: false, size: new Vector2(140, 8), scale: new Vector2(2, 2), clickFunc: (element) => {
+            return true;
+        }));
     }
-
     protected override void Update(double delta)
     {
         base.Update(delta);
@@ -108,5 +138,20 @@ public class OptionsGui : Gui
         context.PrimitiveBatch.End();
         
         base.Draw(context, framebuffer);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (this.TryGetElement("Texture-Slider-Bar", out GuiElement? element))
+            {
+                TextureSlideBarElement slideBarElement = (TextureSlideBarElement) element!;
+                ((PlatformerGame) Game.Instance!).OptionsConfig.SetValue("MasterVolume", slideBarElement.Value);
+                AudioContext.MasterVolume = slideBarElement.Value;
+            }
+        }
+        
+        base.Dispose(disposing);
     }
 }

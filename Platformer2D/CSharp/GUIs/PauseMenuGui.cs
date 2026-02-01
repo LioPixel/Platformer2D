@@ -36,7 +36,7 @@ public class PauseMenuGui : Gui
         TextureButtonData menuButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
-        this.AddElement("Exit-Button", new TextureButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, new Vector2(0, 0), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
+        this.AddElement("Exit-Button", new TextureButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, new Vector2(0, 0), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
             SceneManager.SetScene(null);
             GuiManager.SetGui(new MenuGui());
             return true;
@@ -46,7 +46,7 @@ public class PauseMenuGui : Gui
         TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
         
-        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
+        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
             GuiManager.SetGui(new OptionsGui());
             return true;
         }));
@@ -55,7 +55,7 @@ public class PauseMenuGui : Gui
         TextureButtonData resetButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData resetButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Reset", 18, hoverColor: Color.White);
         
-        this.AddElement("Reset-Button", new TextureButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: () => {
+        this.AddElement("Reset-Button", new TextureButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element ) => {
             if (SceneManager.ActiveScene is LevelScene level)
             {
                 level.OnLevelReset();
