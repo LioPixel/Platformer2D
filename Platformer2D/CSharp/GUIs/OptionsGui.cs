@@ -128,14 +128,36 @@ public class OptionsGui : Gui
             context.SpriteBatch.End();
         }
         
-        Vector2 size = new Vector2(GlobalGraphicsAssets.Window.GetWidth() / 2.0F, GlobalGraphicsAssets.Window.GetHeight() / 2.0F);
-        Vector2 pos = new Vector2( GlobalGraphicsAssets.Window.GetWidth() / 2.0F - size.X / 2.0F, GlobalGraphicsAssets.Window.GetHeight() / 2.0F - size.Y / 2.0F);
+        float scale = this.ScaleFactor;
+            
+        // Define base virtual size (e.g., half of 1280x720) and scale it
+        Vector2 baseSize = new Vector2(550, 310);
+        Vector2 scaledSize = baseSize * scale;
+
+        // Snap window dimensions to scale grid to find the "scaled" center
+        float screenWidth = MathF.Floor(GlobalGraphicsAssets.Window.GetWidth() / (float) scale) * scale;
+        float screenHeight = MathF.Floor(GlobalGraphicsAssets.Window.GetHeight() / (float) scale) * scale;
         
+        Vector2 pos = new Vector2(
+            MathF.Floor((screenWidth / 2.0F - scaledSize.X / 2.0F) / scale) * scale,
+            MathF.Floor((screenHeight / 2.0F - scaledSize.Y / 2.0F) / scale) * scale
+        );
+        
+        // Draw gui rectangle
         context.PrimitiveBatch.Begin(context.CommandList, framebuffer.OutputDescription);
-        context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(pos.X, pos.Y, size.X, size.Y), color: new Color(128, 128, 128, 128));
+            
+        // Overlay (Full screen)
         context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(0, 0, GlobalGraphicsAssets.Window.GetWidth(), GlobalGraphicsAssets.Window.GetHeight()), color: new Color(128, 128, 128, 128));
-        context.PrimitiveBatch.DrawEmptyRectangle(new RectangleF(pos.X, pos.Y, size.X, size.Y), 4, color: new Color(64, 64, 64, 128));
+            
+        // Background Box
+        context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(pos.X, pos.Y, scaledSize.X, scaledSize.Y), color: new Color(128, 128, 128, 128));
+            
+        // Border
+        context.PrimitiveBatch.DrawEmptyRectangle(new RectangleF(pos.X, pos.Y, scaledSize.X, scaledSize.Y), 4 * scale, color: new Color(64, 64, 64, 128));
+            
         context.PrimitiveBatch.End();
+        
+        
         
         base.Draw(context, framebuffer);
     }
