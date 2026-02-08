@@ -6,6 +6,7 @@ using Box2D;
 using MiniAudioEx.Core.StandardAPI;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes;
+using Riptide;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
@@ -20,9 +21,13 @@ namespace Platformer2D.CSharp.Entities;
 
 public class Player : Entity
 {
-    
     public int IsPlayerOnGround;
     public PlayerPoseType PoseType;
+    
+    // Network sync properties
+    public bool IsLocalPlayer;
+    public Vector3 NetworkedPosition;
+    public PlayerPoseType NetworkedPoseType;
     
     private Sprite _sprite;
     private float _timer;
@@ -33,32 +38,43 @@ public class Player : Entity
     private AudioSource _audioSource;
     
     private readonly HashSet<ulong> _groundContacts = new();
-    
     private readonly HashSet<ulong> _leftContacts = new();
     private readonly HashSet<ulong> _rightContacts = new();
     
     private Vector2 _previousPlatformVelocity;
     
-    public Player(Transform transform) : base(transform, "player") { }
+    // Network update timer
+    private float _networkUpdateTimer;
+    private const float NetworkUpdateInterval = 0.05f; // Send updates 20 times per second
+    
+    // Debug timer
+    private float _networkDebugTimer;
+    
+    public Player(Transform transform, bool isLocalPlayer = true) : base(transform, "player") 
+    {
+        IsLocalPlayer = isLocalPlayer;
+        NetworkedPosition = transform.Translation;
+    }
 
     protected override void Init()
     {
         base.Init();
         this.PoseType = PlayerPoseType.RightIdle;
+        this.NetworkedPoseType = PlayerPoseType.RightIdle;
         this._sprite = new Sprite(ContentRegistry.PlayerIdleRight, new Vector2(168, -2), layerDepth: 0.6F);
         this.AddComponent(this._sprite);
         
         RigidBody2D body = new RigidBody2D(new BodyDefinition()
         {
-            Type = BodyType.Dynamic,
+            Type = IsLocalPlayer ? BodyType.Dynamic : BodyType.Kinematic,
             FixedRotation = true,
-            GravityScale = 15.5F
+            GravityScale = IsLocalPlayer ? 15.5F : 0F
         }, new PolygonShape2D(Polygon.MakeBox(7, 8), new ShapeDef()
         {
             Density = 100,
             UserData = "Player",
-            EnableContactEvents = true,
-            EnableSensorEvents = true
+            EnableContactEvents = IsLocalPlayer,
+            EnableSensorEvents = IsLocalPlayer
         }));
         
         this.AddComponent(body);
@@ -79,26 +95,34 @@ public class Player : Entity
             EnableSensorEvents = true
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(7, -1), Rotation.Identity));
         
-        // Contact event.
-        ((Simulation2D) this.Scene.Simulation).ContactBeginTouch += this.ContactBeginTouch;
-        ((Simulation2D) this.Scene.Simulation).ContactEndTouch += this.ContactEndTouch;
-        ((Simulation2D) this.Scene.Simulation).SensorBeginTouch += this.ContactBeginSensorTouch;
-        ((Simulation2D) this.Scene.Simulation).SensorEndTouch += this.ContactEndSensorTouch;
+        // Only subscribe to contact events for local player
+        if (IsLocalPlayer)
+        {
+            ((Simulation2D)this.Scene.Simulation).ContactBeginTouch += this.ContactBeginTouch;
+            ((Simulation2D)this.Scene.Simulation).ContactEndTouch += this.ContactEndTouch;
+            ((Simulation2D)this.Scene.Simulation).SensorBeginTouch += this.ContactBeginSensorTouch;
+            ((Simulation2D)this.Scene.Simulation).SensorEndTouch += this.ContactEndSensorTouch;
+        }
 
         this._audioSource = new AudioSource();
     }
-    
-    
 
     protected override void Update(double delta)
     {
         base.Update(delta);
+        
+        // Handle networked player differently
+        if (!IsLocalPlayer)
+        {
+            UpdateNetworkedPlayer(delta);
+            return;
+        }
+        
         bool isGround = IsPlayerOnGround > 0;
-        bool isLeftWallCol = _leftContacts.Count > 0; // CHATGPT HERE.
-        bool isRightWallCol = _rightContacts.Count > 0; // CHATGPT HERE.
+        bool isLeftWallCol = _leftContacts.Count > 0;
+        bool isRightWallCol = _rightContacts.Count > 0;
         
         // Sprite animation.
-        // increment timer
         _timer += (float)delta;
         
         if (_isJumping)
@@ -131,13 +155,11 @@ public class Player : Entity
                     }
                 }
                 
-                // update sprite frame (assuming your Sprite supports SetFrame)
                 _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
             }
         }
         else
         {
-            // check if it's time to switch frame
             if (_timer >= _frameTime)
             {
                 _timer = 0f;
@@ -146,7 +168,6 @@ public class Player : Entity
                 if (_frame >= TotalFrames)
                     _frame = 0;
 
-                // update sprite frame (assuming your Sprite supports SetFrame)
                 _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
             }
         }
@@ -157,12 +178,11 @@ public class Player : Entity
         if (GuiManager.ActiveGui == null)
         {
             // --- PLAYER MOVEMENT ---
-            float groundAccel = 3f;    // how fast player accelerates on ground
-            float airAccel = 0.5f;     // how fast player accelerates in air
-            float maxSpeed = 50f;      // max horizontal speed
+            float groundAccel = 3f;
+            float airAccel = 0.5f;
+            float maxSpeed = 50f;
             float jumpForce = 90;
             
-            // Horizontal input
             float input = 0f;
             if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
             {
@@ -203,18 +223,12 @@ public class Player : Entity
     
             if (input != 0f)
             {
-                // pick acceleration based on grounded state
                 float accel = isGround ? groundAccel : airAccel;
-    
-                // accelerate towards desired direction
                 velocity.X += input * accel;
-    
-                // clamp max horizontal speed
                 velocity.X = Math.Clamp(velocity.X, -maxSpeed, maxSpeed);
             }
             else if (isGround)
             {
-                // simple friction on ground when no input
                 velocity.X *= 0.8f;
             }
     
@@ -222,8 +236,9 @@ public class Player : Entity
             if ((Input.IsKeyPressed(KeyboardKey.Space) 
                  || Input.IsKeyPressed(KeyboardKey.W)
                  || Input.IsKeyPressed(KeyboardKey.Up))
-                && isGround && !_isJumping)            {
-                velocity.Y = -jumpForce; // usually negative Y is upward
+                && isGround && !_isJumping)
+            {
+                velocity.Y = -jumpForce;
                 
                 if (this.PoseType == PlayerPoseType.LeftWalk || this.PoseType == PlayerPoseType.LeftIdle)
                 {
@@ -251,26 +266,74 @@ public class Player : Entity
 
         body.LinearVelocity = velocity;
         
+        // Network position sync
+        _networkUpdateTimer += (float)delta;
+        if (_networkUpdateTimer >= NetworkUpdateInterval)
+        {
+            _networkUpdateTimer = 0;
+            NetworkManager.SendPlayerPosition(this.Transform.Translation, this.PoseType);
+        }
+        
         // Game over!
         this.GameOver();
         
         // Set sprite type.
         this.SetSpriteByPoseType();
     }
+    
+    private void UpdateNetworkedPlayer(double delta)
+    {
+        // Update pose type
+        this.PoseType = NetworkedPoseType;
+        
+        // Directly set position from network data
+        // For kinematic bodies, we set the transform directly
+        this.Transform.Translation = NetworkedPosition;
+        
+        // Debug every second
+        _networkDebugTimer += (float)delta;
+        if (_networkDebugTimer >= 1.0f)
+        {
+            _networkDebugTimer = 0;
+        }
+        
+        // Update sprite animation
+        _timer += (float)delta;
+        
+        if (_timer >= _frameTime)
+        {
+            _timer = 0f;
+            _frame++;
+
+            if (_frame >= TotalFrames)
+                _frame = 0;
+
+            _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
+        }
+        
+        // Set sprite type
+        this.SetSpriteByPoseType();
+    }
 
     protected override void FixedUpdate(double fixedStep)
     {
         base.FixedUpdate(fixedStep);
+        
+        // Only apply physics to local player
+        if (!IsLocalPlayer) return;
     
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
     
         Vector2 platformVelocity = Vector2.Zero;
 
-        foreach (ContactData contact in body.Contacts) {
-            if (contact.ShapeA.UserData?.ToString() == "MovingBlock") {
+        foreach (ContactData contact in body.Contacts)
+        {
+            if (contact.ShapeA.UserData?.ToString() == "MovingBlock")
+            {
                 platformVelocity = contact.ShapeA.Body.LinearVelocity;
             }
-            else if (contact.ShapeB.UserData?.ToString() == "MovingBlock") {
+            else if (contact.ShapeB.UserData?.ToString() == "MovingBlock")
+            {
                 platformVelocity = contact.ShapeB.Body.LinearVelocity;
             }
         }
@@ -280,6 +343,8 @@ public class Player : Entity
 
     public void GameOver()
     {
+        if (!IsLocalPlayer) return;
+        
         if (this.Transform.Translation.Y >= 5 * 16)
         {
             GuiManager.SetGui(new GameOverGui());
@@ -288,14 +353,12 @@ public class Player : Entity
 
     private void ContactBeginSensorTouch(SensorBeginTouchEvent e)
     {
-        // Check wall left.
         if ((e.SensorShape.UserData?.ToString() == "PlayerLeftSensor") ||
             e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor")
         {
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
         
-        // Check wall right.
         if ((e.SensorShape.UserData?.ToString() == "PlayerRightSensor") ||
             e.VisitorShape.UserData?.ToString() == "PlayerRightSensor")
         {
@@ -305,16 +368,13 @@ public class Player : Entity
 
     private void ContactEndSensorTouch(SensorEndTouchEvent e)
     {
-        // Check wall.
         ulong key = ContactKey(e.SensorShape, e.VisitorShape);
         _leftContacts.Remove(key);
         _rightContacts.Remove(key);
-        
     }
 
     private void ContactBeginTouch(ContactBeginTouchEvent e)
     {
-        // Check ground.
         if (IsGroundContact(e))
         {
             ulong key = ContactKey(e.ShapeA, e.ShapeB);
@@ -324,14 +384,12 @@ public class Player : Entity
             }
         }
         
-        // Win level.
         if ((e.ShapeA.UserData?.ToString() == "flag") ||
             e.ShapeB.UserData?.ToString() == "flag")
         {
-            ((LevelScene) this.Scene).WonLevel = true;
+            ((LevelScene)this.Scene).WonLevel = true;
         }
         
-        // Portal teleport.
         if (e.ShapeA.UserData is Portal entity1)
         {
             this.Transform.Translation = new Vector3(entity1.TeleportPos, 0);
@@ -347,7 +405,6 @@ public class Player : Entity
 
     private void ContactEndTouch(ContactEndTouchEvent e)
     {
-        // Check ground.
         ulong key = ContactKey(e.ShapeA, e.ShapeB);
         if (_groundContacts.Remove(key))
         {
@@ -392,23 +449,17 @@ public class Player : Entity
     
     private bool IsGroundContact(ContactBeginTouchEvent e)
     {
-        // Must involve the Foot
         bool footIsA = e.ShapeA.UserData?.ToString() == "Player";
         bool footIsB = e.ShapeB.UserData?.ToString() == "Player";
         if (!footIsA && !footIsB) return false;
 
-        // Get world normal
         var n = e.Manifold.Normal;
-
-        // Flip normal if needed so it always points from ground->foot
         if (footIsA) n = -n;
 
-        // Compare against gravity (works for Y-down or Y-up)
         var sim = (Simulation2D)this.Scene.Simulation;
         var g = Vector2.Normalize(sim.World.Gravity);
         if (g.LengthSquared() < 1e-6f) g = new Vector2(0, 1);
 
-        // If normal opposes gravity, it’s a floor
         return Vector2.Dot(n, -g) > 0.6f;
     }
     
@@ -416,11 +467,12 @@ public class Player : Entity
     {
         base.Dispose(disposing);
 
-        if (disposing)
+        if (disposing && IsLocalPlayer)
         {
-            // Contact event.
-            ((Simulation2D) this.Scene.Simulation).ContactBeginTouch -= this.ContactBeginTouch;
-            ((Simulation2D) this.Scene.Simulation).ContactEndTouch -= this.ContactEndTouch;
+            ((Simulation2D)this.Scene.Simulation).ContactBeginTouch -= this.ContactBeginTouch;
+            ((Simulation2D)this.Scene.Simulation).ContactEndTouch -= this.ContactEndTouch;
+            ((Simulation2D)this.Scene.Simulation).SensorBeginTouch -= this.ContactBeginSensorTouch;
+            ((Simulation2D)this.Scene.Simulation).SensorEndTouch -= this.ContactEndSensorTouch;
         }
     }
 }

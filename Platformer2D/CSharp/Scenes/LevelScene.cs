@@ -46,8 +46,8 @@ public abstract class LevelScene : Scene
         this.AddEntity(camera2D);
 
         // PLAYER
-        Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
-        this.AddEntity(player);
+        //Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+        //this.AddEntity(player);
     }
     
     protected override void Update(double delta)

@@ -54,5 +54,12 @@ public class PlatformerGame : Game
     protected override void Update(double delta)
     {
         base.Update(delta);
+        
+        NetworkManager.Update();
+    }
+
+    protected override void FixedUpdate(double fixedStep)
+    {
+        base.FixedUpdate(fixedStep);
     }
 }

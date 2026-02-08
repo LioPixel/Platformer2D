@@ -19,5 +19,8 @@
     <ItemGroup>
       <ProjectReference Include="..\Sparkle\src\Sparkle\Sparkle.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="RiptideNetworking.Riptide" Version="2.2.1" />
+    </ItemGroup>
     
 </Project>
