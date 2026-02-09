@@ -1,9 +1,12 @@
 ﻿using System.Numerics;
+using Bliss.CSharp;
 using Bliss.CSharp.Logging;
 using Bliss.CSharp.Transformations;
 using Platformer2D.CSharp.Entities;
+using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes.Levels;
 using Riptide;
+using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.Scenes;
 
 namespace Platformer2D.CSharp;
@@ -101,6 +104,7 @@ public static class NetworkManager
         Client = new Client();
         Client.Connected += OnClientConnected;
         Client.ConnectionFailed += OnClientConnectionFailed;
+        Client.Disconnected += OnClientDisconnected;
         Client.Connect("127.0.0.1:7777");
         Logger.Info("[CLIENT] Host connecting to own server at 127.0.0.1:7777");
     }
@@ -147,6 +151,7 @@ public static class NetworkManager
         Client = new Client();
         Client.Connected += OnClientConnected;
         Client.ConnectionFailed += OnClientConnectionFailed;
+        Client.Disconnected += OnClientDisconnected;
         
         // Make sure to use the provided IP, not hardcoded localhost
         if (!ip.Contains(":"))
@@ -165,6 +170,66 @@ public static class NetworkManager
     private static void OnClientConnectionFailed(object sender, EventArgs e)
     {
         Logger.Error("[CLIENT] Failed to connect to server!");
+    }
+    
+    private static void OnClientDisconnected(object sender, DisconnectedEventArgs e)
+    {
+        Logger.Warn($"[CLIENT] Disconnected from server! Reason: {e.Reason}");
+        
+        // Clean up all networked players
+        foreach (var player in NetworkedPlayers.Values)
+        {
+            player.Dispose();
+        }
+        NetworkedPlayers.Clear();
+        
+        // Optional: Switch to a background scene first if needed
+        
+        // Show the "Host Left" GUI with background image
+        // (Make sure your HostLeavedGui includes a background Sprite component)
+        GuiManager.SetGui(new HostLeavedGui());
+        
+        Logger.Info("[CLIENT] Host left - showing HostLeavedGui");
+    }
+    
+    public static void Cleanup()
+    {
+        Logger.Info("[NETWORK] Starting cleanup...");
+        
+        // If we're a client (not hosting), disconnect cleanly so server knows we left
+        if (Client != null && Client.IsConnected && (Server == null || !Server.IsRunning))
+        {
+            Logger.Info("[NETWORK] Client disconnecting from server");
+            Client.Disconnect();
+        }
+        
+        // Stop server FIRST if we're hosting - this will disconnect all clients
+        if (Server != null && Server.IsRunning)
+        {
+            Logger.Info("[NETWORK] Stopping server - this will disconnect all clients");
+            Server.Stop();
+            Server = null;
+        }
+        
+        // Disconnect our own client if we were hosting
+        if (Client != null && Client.IsConnected)
+        {
+            Logger.Info("[NETWORK] Disconnecting host's client");
+            Client.Disconnect();
+            Client = null;
+        }
+        
+        // Clean up all networked players
+        foreach (var player in NetworkedPlayers.Values)
+        {
+            player.Dispose();
+        }
+        
+        
+        
+        NetworkedPlayers.Clear();
+        
+        Logger.Info("[NETWORK] Full cleanup completed");
     }
     
     // Message 1: Initial connection - receive scene and player ID
@@ -289,10 +354,17 @@ public static class NetworkManager
     {
         ushort playerId = message.GetUShort();
         
+        Logger.Info($"[DESPAWN] Received despawn message for player {playerId}");
+        
         if (NetworkedPlayers.ContainsKey(playerId))
         {
             NetworkedPlayers[playerId].Dispose();
             NetworkedPlayers.Remove(playerId);
+            Logger.Info($"[DESPAWN] Successfully despawned and removed player {playerId}");
+        }
+        else
+        {
+            Logger.Warn($"[DESPAWN] Player {playerId} not found in NetworkedPlayers dictionary");
         }
     }
     

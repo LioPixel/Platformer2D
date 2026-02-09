@@ -73,12 +73,16 @@ public abstract class LevelScene : Scene
             return;
         }
 
-        Entity? player = this.GetEntity(2);
-
-        if (player != null)
+        foreach (Entity entity in this.GetEntities())
         {
-            Vector3 playerPos = player.Transform.Translation;
-            cam2D.Target = new Vector2(playerPos.X, playerPos.Y);   
+            if (entity is Player player)
+            {
+                if (player.IsLocalPlayer)
+                {
+                    Vector3 playerPos = player.Transform.Translation;
+                    cam2D.Target = new Vector2(playerPos.X, playerPos.Y);   
+                }
+            }
         }
         
         // Level won.

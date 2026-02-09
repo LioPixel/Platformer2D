@@ -52,4 +52,14 @@ public class Level5 : LevelScene
     {
         SceneManager.SetScene(new Level5());
     }
+    
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            NetworkManager.Cleanup();
+            
+            base.Dispose(disposing);
+        }
+    }
 }

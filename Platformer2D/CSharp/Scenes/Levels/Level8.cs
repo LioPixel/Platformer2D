@@ -48,4 +48,14 @@ public class Level8 : LevelScene
     {
         SceneManager.SetScene(new Level8());
     }
+    
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            NetworkManager.Cleanup();
+            
+            base.Dispose(disposing);
+        }
+    }
 }

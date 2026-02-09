@@ -1,7 +1,9 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Transformations;
+using Platformer2D.CSharp.Entities;
 using Platformer2D.CSharp.Scenes;
+using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -44,7 +46,17 @@ public class GameOverGui : Gui
         this.AddElement("Reset-Button", new TextureButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 0), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
             if (SceneManager.ActiveScene is LevelScene level)
             {
-                level.OnLevelReset();
+                foreach (Entity entity in level.GetEntities())
+                {
+                    if (entity is Player player)
+                    {
+                        if (player.IsLocalPlayer)
+                        {
+                            player.Transform.Translation = new Vector3(0, -16 * 2, 0);
+                            SceneManager.ActiveCam2D?.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);   
+                        }
+                    }
+                }
             }
             
             GuiManager.SetGui(null);

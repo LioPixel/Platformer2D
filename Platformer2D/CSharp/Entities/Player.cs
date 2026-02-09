@@ -74,7 +74,13 @@ public class Player : Entity
             Density = 100,
             UserData = "Player",
             EnableContactEvents = IsLocalPlayer,
-            EnableSensorEvents = IsLocalPlayer
+            EnableSensorEvents = IsLocalPlayer,
+            // Collision filtering: players don't collide with each other but DO collide with blocks
+            Filter = new Filter()
+            {
+                CategoryBits = 0x0002,  // This is a player (category 2)
+                MaskBits = 0xFFFD       // Collide with everything (0xFFFF) EXCEPT other players (NOT 0x0002)
+            }
         }));
         
         this.AddComponent(body);
@@ -84,7 +90,13 @@ public class Player : Entity
             IsSensor = true,
             UserData = "PlayerLeftSensor",
             EnableContactEvents = false,
-            EnableSensorEvents = true
+            EnableSensorEvents = true,
+            // Sensors detect walls/blocks but NOT other players
+            Filter = new Filter()
+            {
+                CategoryBits = 0x0002,
+                MaskBits = 0xFFFD
+            }
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(-7, -1), Rotation.Identity));
         
         body.CreateShape(new ShapeDef()
@@ -92,7 +104,13 @@ public class Player : Entity
             IsSensor = true,
             UserData = "PlayerRightSensor",
             EnableContactEvents = false,
-            EnableSensorEvents = true
+            EnableSensorEvents = true,
+            // Sensors detect walls/blocks but NOT other players
+            Filter = new Filter()
+            {
+                CategoryBits = 0x0002,
+                MaskBits = 0xFFFD
+            }
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(7, -1), Rotation.Identity));
         
         // Only subscribe to contact events for local player

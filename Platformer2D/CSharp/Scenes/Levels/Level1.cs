@@ -32,5 +32,15 @@ public class Level1 : LevelScene
     {
         SceneManager.SetScene(new Level1());
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            NetworkManager.Cleanup();
+            
+            base.Dispose(disposing);
+        }
+    }
 }
 
