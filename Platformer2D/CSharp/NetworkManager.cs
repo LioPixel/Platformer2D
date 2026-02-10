@@ -155,8 +155,6 @@ public static class NetworkManager
     {
         ushort messageId = e.MessageId;
         
-        Logger.Info($"[SERVER] Received message {messageId} from client {e.FromConnection.Id}");
-        
         switch (messageId)
         {
             case 2: // Position update
@@ -232,8 +230,6 @@ public static class NetworkManager
     private static void HandleClientMessageReceived(object sender, MessageReceivedEventArgs e)
     {
         ushort messageId = e.MessageId;
-        
-        Logger.Info($"[CLIENT] Received message {messageId}");
         
         switch (messageId)
         {
@@ -372,7 +368,7 @@ public static class NetworkManager
         float z = message.GetFloat();
         int poseType = message.GetInt();
         
-        Logger.Info($"[SERVER] Received position from client {fromClientId}: Player {playerId} at ({x:F2}, {y:F2})");
+        //Logger.Info($"[SERVER] Received position from client {fromClientId}: Player {playerId} at ({x:F2}, {y:F2})");
         
         // Broadcast to all OTHER clients
         Message broadcastMessage = Message.Create(MessageSendMode.Unreliable, 2);
@@ -383,7 +379,7 @@ public static class NetworkManager
         broadcastMessage.AddInt(poseType);
         Server.SendToAll(broadcastMessage, fromClientId);
         
-        Logger.Info($"[SERVER] Broadcasted player {playerId} position to all clients except {fromClientId}");
+        //Logger.Info($"[SERVER] Broadcasted player {playerId} position to all clients except {fromClientId}");
     }
 
     public static void JoinServer(string ip)
@@ -629,8 +625,6 @@ public static class NetworkManager
         float z = message.GetFloat();
         int poseType = message.GetInt();
         
-        Logger.Info($"[CLIENT RECV] Position update for player {playerId} at ({x:F2}, {y:F2})");
-        
         // Update the player position if it's not our local player
         if (playerId != LocalPlayerId)
         {
@@ -638,16 +632,16 @@ public static class NetworkManager
             {
                 NetworkedPlayers[playerId].NetworkedPosition = new Vector3(x, y, z);
                 NetworkedPlayers[playerId].NetworkedPoseType = (PlayerPoseType)poseType;
-                Logger.Info($"[CLIENT RECV] Updated player {playerId} to ({x:F2}, {y:F2})");
+                //Logger.Info($"[CLIENT RECV] Updated player {playerId} to ({x:F2}, {y:F2})");
             }
             else
             {
-                Logger.Warn($"[CLIENT RECV] Player {playerId} not in dictionary! Available: {string.Join(", ", NetworkedPlayers.Keys)}");
+                //Logger.Warn($"[CLIENT RECV] Player {playerId} not in dictionary! Available: {string.Join(", ", NetworkedPlayers.Keys)}");
             }
         }
         else
         {
-            Logger.Info($"[CLIENT RECV] Ignoring update for local player {playerId}");
+            //Logger.Info($"[CLIENT RECV] Ignoring update for local player {playerId}");
         }
     }
     
