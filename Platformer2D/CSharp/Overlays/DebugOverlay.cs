@@ -1,9 +1,7 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Interact;
-using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Transformations;
-using Platformer2D.CSharp.Scenes;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Graphics;

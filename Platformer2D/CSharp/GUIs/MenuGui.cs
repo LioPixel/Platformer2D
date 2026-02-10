@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
-using Bliss.CSharp.Graphics.Rendering.Renderers.Batches.Sprites;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
@@ -13,7 +12,6 @@ using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
 using Sparkle.CSharp.Scenes;
 using Veldrid;
-using ImGuiNET;
 
 namespace Platformer2D.CSharp.GUIs;
 
@@ -232,8 +230,7 @@ public class MenuGui : Gui
                 SceneManager.ActiveScene?.AddEntity(player);
                 return true;
             }));
-
-
+        
         // Options button.
         TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton,
             hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));

@@ -68,7 +68,6 @@ public class GameOverGui : Gui
                 }
             }
             
-            
             GuiManager.SetGui(null);
             return true;
         }));

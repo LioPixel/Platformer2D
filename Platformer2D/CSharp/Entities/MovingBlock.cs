@@ -2,7 +2,6 @@
 using Box2D;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
-using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Transform = Bliss.CSharp.Transformations.Transform;

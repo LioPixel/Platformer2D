@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Bliss.CSharp.Colors;
 using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
@@ -9,7 +8,6 @@ using MiniAudioEx.Core.StandardAPI;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes;
 using Platformer2D.CSharp.Scenes.Levels;
-using Riptide;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
@@ -18,7 +16,6 @@ using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Sparkle.CSharp.Scenes;
-using Sparkle.CSharp.Content;
 using Transform = Bliss.CSharp.Transformations.Transform;
 
 namespace Platformer2D.CSharp.Entities;

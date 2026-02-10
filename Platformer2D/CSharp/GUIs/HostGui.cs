@@ -6,8 +6,6 @@ using Bliss.CSharp.Logging;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
-using Platformer2D.CSharp.Scenes.Levels;
-using Sparkle.CSharp;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -69,7 +67,7 @@ public class HostGui : Gui
             return true;
         }));
         
-                // Texture drop down.
+        // Texture drop down.
         TextureDropDownData selectionDropDownData = new TextureDropDownData(
             ContentRegistry.UiButton,
             ContentRegistry.UiMenu,
@@ -135,7 +133,7 @@ public class HostGui : Gui
             
             if (slideBarElement is TextureSlideBarElement slideBar)
             {
-                NetworkManager.CreateServer((ushort) slideBar.Value, "Level 1");
+                NetworkManager.CreateServer((ushort) slideBar.Value, dropDownElement.SelectedOption?.Text ?? "Level 1");
                 GuiManager.SetGui(null);
                 Logger.Info("SERVER STARTED!!!!");
             }
