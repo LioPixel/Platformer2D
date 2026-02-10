@@ -69,8 +69,8 @@ public class JoinGui : Gui
         }));
         
         // Error message label (initially empty)
-        LabelData errorLabelData = new LabelData(ContentRegistry.Fontoe, "", 14, color: Color.Red);
-        this.AddElement("Error-Label", new LabelElement(errorLabelData, Anchor.Center, new Vector2(0, 110), new Vector2(5, 5)));
+        LabelData errorLabelData = new LabelData(ContentRegistry.Fontoe, "", 18, color: Color.Red);
+        this.AddElement("Error-Label", new LabelElement(errorLabelData, Anchor.Center, new Vector2(0, 110), new Vector2(1, 1)));
     }
     
     private void TryJoinServer()

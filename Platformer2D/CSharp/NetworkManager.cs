@@ -129,6 +129,22 @@ public static class NetworkManager
                 return 1;
             case "Level 2":
                 return 2;
+            case "Level 3":
+                return 3;
+            case "Level 4":
+                return 4;
+            case "Level 5":
+                return 5;
+            case "Level 6":
+                return 6;
+            case "Level 7":
+                return 7;
+            case "Level 8":
+                return 8;
+            case "Level 9":
+                return 9;
+            case "Level 10":
+                return 10;
             default:
                 return 1;
         }
@@ -284,6 +300,38 @@ public static class NetworkManager
             case 2:
                 Logger.Info("[CLIENT] Transitioning to Level2...");
                 SceneManager.SetScene(new Level2());
+                break;
+            case 3:
+                Logger.Info("[CLIENT] Transitioning to Level3...");
+                SceneManager.SetScene(new Level3());
+                break;
+            case 4:
+                Logger.Info("[CLIENT] Transitioning to Level4...");
+                SceneManager.SetScene(new Level4());
+                break;
+            case 5:
+                Logger.Info("[CLIENT] Transitioning to Level5...");
+                SceneManager.SetScene(new Level5());
+                break;
+            case 6:
+                Logger.Info("[CLIENT] Transitioning to Level6...");
+                SceneManager.SetScene(new Level6());
+                break;
+            case 7:
+                Logger.Info("[CLIENT] Transitioning to Level7...");
+                SceneManager.SetScene(new Level7());
+                break;
+            case 8:
+                Logger.Info("[CLIENT] Transitioning to Level8...");
+                SceneManager.SetScene(new Level8());
+                break;
+            case 9:
+                Logger.Info("[CLIENT] Transitioning to Level9...");
+                SceneManager.SetScene(new Level9());
+                break;
+            case 10:
+                Logger.Info("[CLIENT] Transitioning to Level10...");
+                SceneManager.SetScene(new Level10());
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");
@@ -507,6 +555,38 @@ public static class NetworkManager
             case 2:
                 Logger.Info("[CLIENT] Loading Level2...");
                 SceneManager.SetScene(new Level2());
+                break;
+            case 3:
+                Logger.Info("[CLIENT] Loading Level3...");
+                SceneManager.SetScene(new Level3());
+                break;
+            case 4:
+                Logger.Info("[CLIENT] Loading Level4...");
+                SceneManager.SetScene(new Level4());
+                break;
+            case 5:
+                Logger.Info("[CLIENT] Loading Level5...");
+                SceneManager.SetScene(new Level5());
+                break;
+            case 6:
+                Logger.Info("[CLIENT] Loading Level6...");
+                SceneManager.SetScene(new Level6());
+                break;
+            case 7:
+                Logger.Info("[CLIENT] Loading Level7...");
+                SceneManager.SetScene(new Level7());
+                break;
+            case 8:
+                Logger.Info("[CLIENT] Loading Level8...");
+                SceneManager.SetScene(new Level8());
+                break;
+            case 9:
+                Logger.Info("[CLIENT] Loading Level9...");
+                SceneManager.SetScene(new Level9());
+                break;
+            case 10:
+                Logger.Info("[CLIENT] Loading Level10...");
+                SceneManager.SetScene(new Level10());
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");
