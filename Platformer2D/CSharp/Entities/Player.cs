@@ -417,14 +417,23 @@ public class Player : Entity
 
     private void ContactBeginSensorTouch(SensorBeginTouchEvent e)
     {
-        if ((e.SensorShape.UserData?.ToString() == "PlayerLeftSensor") ||
-            e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor")
+        RigidBody2D myBody = this.GetComponent<RigidBody2D>()!;
+        
+        // Only track contacts if the sensor belongs to THIS player's body
+        if (e.SensorShape.UserData?.ToString() == "PlayerLeftSensor" && e.SensorShape.Body == myBody.Body)
+        {
+            _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
+        }
+        else if (e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor" && e.VisitorShape.Body == myBody.Body)
         {
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
 
-        if ((e.SensorShape.UserData?.ToString() == "PlayerRightSensor") ||
-            e.VisitorShape.UserData?.ToString() == "PlayerRightSensor")
+        if (e.SensorShape.UserData?.ToString() == "PlayerRightSensor" && e.SensorShape.Body == myBody.Body)
+        {
+            _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
+        }
+        else if (e.VisitorShape.UserData?.ToString() == "PlayerRightSensor" && e.VisitorShape.Body == myBody.Body)
         {
             _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
@@ -432,9 +441,21 @@ public class Player : Entity
 
     private void ContactEndSensorTouch(SensorEndTouchEvent e)
     {
-        ulong key = ContactKey(e.SensorShape, e.VisitorShape);
-        _leftContacts.Remove(key);
-        _rightContacts.Remove(key);
+        RigidBody2D myBody = this.GetComponent<RigidBody2D>()!;
+        
+        // Only remove contacts if the sensor belongs to THIS player's body
+        bool isMyLeftSensor = (e.SensorShape.UserData?.ToString() == "PlayerLeftSensor" && e.SensorShape.Body == myBody.Body) ||
+                              (e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor" && e.VisitorShape.Body == myBody.Body);
+        
+        bool isMyRightSensor = (e.SensorShape.UserData?.ToString() == "PlayerRightSensor" && e.SensorShape.Body == myBody.Body) ||
+                               (e.VisitorShape.UserData?.ToString() == "PlayerRightSensor" && e.VisitorShape.Body == myBody.Body);
+        
+        if (isMyLeftSensor || isMyRightSensor)
+        {
+            ulong key = ContactKey(e.SensorShape, e.VisitorShape);
+            _leftContacts.Remove(key);
+            _rightContacts.Remove(key);
+        }
     }
 
     private void ContactBeginTouch(ContactBeginTouchEvent e)
