@@ -1,4 +1,7 @@
-﻿using Sparkle.CSharp.Scenes;
+﻿using System.Numerics;
+using Bliss.CSharp.Transformations;
+using Platformer2D.CSharp.Entities;
+using Sparkle.CSharp.Scenes;
 
 namespace Platformer2D.CSharp.Scenes.Levels;
 
@@ -32,6 +35,8 @@ public class Level3 : LevelScene
         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
         {
             SceneManager.SetScene(new Level4());
+            Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+            SceneManager.ActiveScene?.AddEntity(player);
         }
     }
     

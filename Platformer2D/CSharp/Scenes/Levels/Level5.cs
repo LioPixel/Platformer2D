@@ -1,5 +1,8 @@
-﻿using Bliss.CSharp.Colors;
+﻿using System.Numerics;
+using Bliss.CSharp.Colors;
 using Bliss.CSharp.Textures;
+using Bliss.CSharp.Transformations;
+using Platformer2D.CSharp.Entities;
 using Sparkle.CSharp.Scenes;
 
 namespace Platformer2D.CSharp.Scenes.Levels;
@@ -48,6 +51,8 @@ public class Level5 : LevelScene
         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
         {
             SceneManager.SetScene(new Level6());
+            Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+            SceneManager.ActiveScene?.AddEntity(player);
         }
     }
     
