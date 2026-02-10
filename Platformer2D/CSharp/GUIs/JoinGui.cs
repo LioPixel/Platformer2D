@@ -18,6 +18,10 @@ namespace Platformer2D.CSharp.GUIs;
 
 public class JoinGui : Gui
 {
+    private bool _isConnecting = false;
+    private string _errorMessage = "";
+    private float _errorDisplayTime = 0f;
+    
     public JoinGui () : base("Join", null) { }
 
     protected override void Init()
@@ -57,20 +61,84 @@ public class JoinGui : Gui
         
         this.AddElement("Join-Button", new TextureButtonElement(createButtonData, createButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
         {
-            NetworkManager.JoinServer("127.0.0.1:7777");
-            GuiManager.SetGui(null);
+            if (!_isConnecting)
+            {
+                TryJoinServer();
+            }
             return true;
         }));
+        
+        // Error message label (initially empty)
+        LabelData errorLabelData = new LabelData(ContentRegistry.Fontoe, "", 14, color: Color.Red);
+        this.AddElement("Error-Label", new LabelElement(errorLabelData, Anchor.Center, new Vector2(0, 110), new Vector2(5, 5)));
     }
     
+    private void TryJoinServer()
+    {
+        // Get IP from text box
+        TextureTextBoxElement textBox = (TextureTextBoxElement)this.GetElement("Texture-Text-Box");
+        string ipAddress = textBox.LabelData.Text.Trim();
+        
+        // Use default if empty
+        if (string.IsNullOrWhiteSpace(ipAddress))
+        {
+            ipAddress = "127.0.0.1:7777";
+        }
+        
+        _isConnecting = true;
+        _errorMessage = "Connecting...";
+        UpdateErrorLabel();
+        
+        // Set up connection callbacks
+        NetworkManager.SetConnectionCallbacks(OnConnectionSuccess, OnConnectionFailed);
+        
+        // Attempt to join
+        NetworkManager.JoinServer(ipAddress);
+    }
+    
+    private void OnConnectionSuccess()
+    {
+        _isConnecting = false;
+        _errorMessage = "";
+        
+        // Close the GUI on successful connection
+        GuiManager.SetGui(null);
+    }
+    
+    private void OnConnectionFailed(string reason)
+    {
+        _isConnecting = false;
+        _errorMessage = $"Connection failed: {reason}";
+        _errorDisplayTime = 5f; // Display error for 5 seconds
+        UpdateErrorLabel();
+    }
+    
+    private void UpdateErrorLabel()
+    {
+        LabelElement errorLabel = (LabelElement)this.GetElement("Error-Label");
+        if (errorLabel != null)
+        {
+            errorLabel.Data.Text = _errorMessage;
+        }
+    }
     
     protected override void Update(double delta)
     {
         base.Update(delta);
 
+        // Countdown error display time
+        if (_errorDisplayTime > 0)
+        {
+            _errorDisplayTime -= (float)delta;
+            if (_errorDisplayTime <= 0)
+            {
+                _errorMessage = "";
+                UpdateErrorLabel();
+            }
+        }
+
         if (Input.IsKeyPressed(KeyboardKey.Escape))
         {
-
             if (SceneManager.ActiveScene == null)
             {
                 GuiManager.SetGui(new MenuGui());

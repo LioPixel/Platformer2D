@@ -25,7 +25,12 @@ public class Level1 : LevelScene
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level2());
+        // Only transition locally if we're NOT in a network game
+        // In network games, the server handles the transition
+        if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
+        {
+            SceneManager.SetScene(new Level2());
+        }
     }
 
     public override void OnLevelReset()
@@ -37,10 +42,13 @@ public class Level1 : LevelScene
     {
         if (disposing)
         {
-            NetworkManager.Cleanup();
+            // Only cleanup network if we're actually quitting, not during level transitions
+            if (!NetworkManager.IsLevelTransition)
+            {
+                NetworkManager.Cleanup();
+            }
             
             base.Dispose(disposing);
         }
     }
 }
-

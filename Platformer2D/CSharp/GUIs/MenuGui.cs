@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Graphics.Rendering.Renderers.Batches.Sprites;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
@@ -12,46 +13,57 @@ using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
 using Sparkle.CSharp.Scenes;
 using Veldrid;
+using ImGuiNET;
 
 namespace Platformer2D.CSharp.GUIs;
 
 public class MenuGui : Gui
 {
-    public MenuGui() : base("Menu", null) { }
+    public MenuGui() : base("Menu", null)
+    {
+    }
+
+    public string _nameInput = "Player";
+    private TextureTextBoxElement? _nameInputBox;
+
 
     protected override void Init()
     {
         base.Init();
 
-        GuiManager.Scale = 1.25F; 
-        
-        LabelData fullscreen = new LabelData(ContentRegistry.Fontoe, "please go to full screen", 18, color: Color.White);
-        this.AddElement("fullscreen", new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0), new Vector2(1.5F, 1.5F))); 
-        
+        GuiManager.Scale = 1.25F;
+
+        LabelData fullscreen =
+            new LabelData(ContentRegistry.Fontoe, "please go to full screen", 18, color: Color.White);
+        this.AddElement("fullscreen",
+            new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0), new Vector2(1.5F, 1.5F)));
+
         LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Platformer2D", 18);
-        this.AddElement("Test-Label", new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
+        this.AddElement("Test-Label",
+            new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
 
         string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace: JUMP";
         LabelData controlLabelData = new LabelData(ContentRegistry.Fontoe, controlText, 18, color: Color.White);
         this.AddElement("Control-Label", new LabelElement(controlLabelData, Anchor.TopLeft, new Vector2(10, 10)));
-        
+
         string creditsText = "Credits:\nLio: Developer/Designer\nMrScautHD: Developer";
         LabelData creditsLabelData = new LabelData(ContentRegistry.Fontoe, creditsText, 18, color: Color.White);
         this.AddElement("Credits-Label", new LabelElement(creditsLabelData, Anchor.BottomLeft, new Vector2(10, -10)));
-        
+
         // Button color.
         Color lightPurpleColor = new Color(147, 112, 219, 180);
         Color purpleColor = new Color(128, 0, 128, 180);
         Color darkPurpleColor = new Color(75, 0, 130, 180);
-        
-                // Texture drop down.
+
+        // Texture drop down.
         TextureDropDownData multiplayerDropDownData = new TextureDropDownData(
             ContentRegistry.UiButton,
             ContentRegistry.UiMenu,
             ContentRegistry.UiMenu,
             ContentRegistry.UiSlider,
             ContentRegistry.UiArrow,
-            sliderBarSourceRect: new Rectangle(2, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height),
+            sliderBarSourceRect: new Rectangle(2, 0, (int)ContentRegistry.UiMenu.Width - 2,
+                (int)ContentRegistry.UiMenu.Height),
             fieldResizeMode: ResizeMode.NineSlice,
             menuResizeMode: ResizeMode.NineSlice,
             sliderBarResizeMode: ResizeMode.NineSlice,
@@ -59,12 +71,13 @@ public class MenuGui : Gui
             menuBorderInsets: new BorderInsets(5),
             sliderBarBorderInsets: new BorderInsets(5)
         );
-        
-        List<LabelData> multiplayerOptions = [
+
+        List<LabelData> multiplayerOptions =
+        [
             new LabelData(ContentRegistry.Fontoe, "Host", 18),
             new LabelData(ContentRegistry.Fontoe, "Join", 18)
         ];
-        
+
         TextureDropDownElement multiplayerdropDownElement = new TextureDropDownElement(
             multiplayerDropDownData,
             multiplayerOptions,
@@ -78,20 +91,26 @@ public class MenuGui : Gui
             sliderOffset: new Vector2(-1F, 0),
             scrollMaskInsets: (3, 3)
         );
-        
-        multiplayerdropDownElement.MenuToggled += (isMenuOpen) => {
-            if (isMenuOpen) {
-                if (multiplayerdropDownElement.Options.Count > multiplayerdropDownElement.MaxVisibleOptions) {
-                    multiplayerdropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height);
-                } 
+
+        multiplayerdropDownElement.MenuToggled += (isMenuOpen) =>
+        {
+            if (isMenuOpen)
+            {
+                if (multiplayerdropDownElement.Options.Count > multiplayerdropDownElement.MaxVisibleOptions)
+                {
+                    multiplayerdropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0,
+                        (int)ContentRegistry.UiMenu.Width - 2, (int)ContentRegistry.UiMenu.Height);
+                }
             }
-            else {
-                multiplayerdropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width, (int) ContentRegistry.UiMenu.Height);
+            else
+            {
+                multiplayerdropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0,
+                    (int)ContentRegistry.UiMenu.Width, (int)ContentRegistry.UiMenu.Height);
             }
         };
-        
+
         this.AddElement("Multiplayer-Drop-Down", multiplayerdropDownElement);
-        
+
         // Texture drop down.
         TextureDropDownData selectionDropDownData = new TextureDropDownData(
             ContentRegistry.UiButton,
@@ -99,7 +118,8 @@ public class MenuGui : Gui
             ContentRegistry.UiMenu,
             ContentRegistry.UiSlider,
             ContentRegistry.UiArrow,
-            sliderBarSourceRect: new Rectangle(2, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height),
+            sliderBarSourceRect: new Rectangle(2, 0, (int)ContentRegistry.UiMenu.Width - 2,
+                (int)ContentRegistry.UiMenu.Height),
             fieldResizeMode: ResizeMode.NineSlice,
             menuResizeMode: ResizeMode.NineSlice,
             sliderBarResizeMode: ResizeMode.NineSlice,
@@ -107,8 +127,9 @@ public class MenuGui : Gui
             menuBorderInsets: new BorderInsets(5),
             sliderBarBorderInsets: new BorderInsets(5)
         );
-        
-        List<LabelData> options = [
+
+        List<LabelData> options =
+        [
             new LabelData(ContentRegistry.Fontoe, "Level 1", 18),
             new LabelData(ContentRegistry.Fontoe, "Level 2", 18),
             new LabelData(ContentRegistry.Fontoe, "Level 3", 18),
@@ -120,7 +141,7 @@ public class MenuGui : Gui
             new LabelData(ContentRegistry.Fontoe, "Level 9", 18),
             new LabelData(ContentRegistry.Fontoe, "Level 10", 18),
         ];
-        
+
         TextureDropDownElement dropDownElement = new TextureDropDownElement(
             selectionDropDownData,
             options,
@@ -134,130 +155,152 @@ public class MenuGui : Gui
             sliderOffset: new Vector2(-1F, 0),
             scrollMaskInsets: (3, 3)
         );
-        
-        dropDownElement.MenuToggled += (isMenuOpen) => {
-            if (isMenuOpen) {
-                if (dropDownElement.Options.Count > dropDownElement.MaxVisibleOptions) {
-                    dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width - 2, (int) ContentRegistry.UiMenu.Height);
-                } 
+
+        dropDownElement.MenuToggled += (isMenuOpen) =>
+        {
+            if (isMenuOpen)
+            {
+                if (dropDownElement.Options.Count > dropDownElement.MaxVisibleOptions)
+                {
+                    dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0,
+                        (int)ContentRegistry.UiMenu.Width - 2, (int)ContentRegistry.UiMenu.Height);
+                }
             }
-            else {
-                dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int) ContentRegistry.UiMenu.Width, (int) ContentRegistry.UiMenu.Height);
+            else
+            {
+                dropDownElement.DropDownData.MenuSourceRect = new Rectangle(0, 0, (int)ContentRegistry.UiMenu.Width,
+                    (int)ContentRegistry.UiMenu.Height);
             }
         };
-        
+
         this.AddElement("Texture-Drop-Down", dropDownElement);
-        
+
         // Texture button.
-        TextureButtonData textureButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        TextureButtonData textureButtonData = new TextureButtonData(ContentRegistry.UiButton,
+            hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData textureButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Play", 18, hoverColor: Color.White);
-        
-        this.AddElement("Texture-Button", new TextureButtonElement(textureButtonData, textureButtonLabelData, Anchor.Center, Vector2.Zero, size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
-        {
-            switch (dropDownElement.SelectedOption?.Text)
-            {
-                case "Level 1":
-                    SceneManager.SetScene(new Level1());
-                    break;
-                
-                case "Level 2":
-                    SceneManager.SetScene(new Level2());
-                    break;
-                
-                case "Level 3":
-                    SceneManager.SetScene(new Level3());
-                    break;
-                
-                case "Level 4":
-                    SceneManager.SetScene(new Level4());
-                    break;
-                
-                case "Level 5":
-                    SceneManager.SetScene(new Level5());
-                    break;
-                
-                case "Level 6":
-                    SceneManager.SetScene(new Level6());
-                    break;
-                
-                case "Level 7":
-                    SceneManager.SetScene(new Level7());
-                    break;
-                
-                case "Level 8":
-                    SceneManager.SetScene(new Level8());
-                    break;
-                
-                case "Level 9":
-                    SceneManager.SetScene(new Level9());
-                    break;
-                
-                case "Level 10":
-                    SceneManager.SetScene(new Level10());
-                    break;
-            }
 
-            GuiManager.SetGui(null);
-            Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
-            SceneManager.ActiveScene?.AddEntity(player);
-            return true;
-        }));
-        
-        
+        this.AddElement("Texture-Button", new TextureButtonElement(textureButtonData, textureButtonLabelData,
+            Anchor.Center, Vector2.Zero, size: new Vector2(230, 40), textOffset: new Vector2(0, 1),
+            clickFunc: (element) =>
+            {
+                switch (dropDownElement.SelectedOption?.Text)
+                {
+                    case "Level 1":
+                        SceneManager.SetScene(new Level1());
+                        break;
+
+                    case "Level 2":
+                        SceneManager.SetScene(new Level2());
+                        break;
+
+                    case "Level 3":
+                        SceneManager.SetScene(new Level3());
+                        break;
+
+                    case "Level 4":
+                        SceneManager.SetScene(new Level4());
+                        break;
+
+                    case "Level 5":
+                        SceneManager.SetScene(new Level5());
+                        break;
+
+                    case "Level 6":
+                        SceneManager.SetScene(new Level6());
+                        break;
+
+                    case "Level 7":
+                        SceneManager.SetScene(new Level7());
+                        break;
+
+                    case "Level 8":
+                        SceneManager.SetScene(new Level8());
+                        break;
+
+                    case "Level 9":
+                        SceneManager.SetScene(new Level9());
+                        break;
+
+                    case "Level 10":
+                        SceneManager.SetScene(new Level10());
+                        break;
+                }
+
+                GuiManager.SetGui(null);
+                Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+                SceneManager.ActiveScene?.AddEntity(player);
+                return true;
+            }));
+
+
         // Options button.
-        TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
-        LabelData optionsButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
-        
-        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
-            GuiManager.SetGui(new OptionsGui());
-            return true;
-        }));
-        
-        // Exit button.
-        TextureButtonData exitButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
-        LabelData exitButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Exit", 18, hoverColor: Color.White);
-        
-        this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center, new Vector2(0, 180), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
-        {
-            Game.Instance.ShouldClose = true;
-            return true;
-        }));
-        
-        // Multiplayer button.
-        TextureButtonData multiplayerButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
-        LabelData multiplayerButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Multiplayer", 18, hoverColor: Color.White);
-        
-        this.AddElement("Multiplayer-Button", new TextureButtonElement(multiplayerButtonData, multiplayerButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
-        {
-            switch (multiplayerdropDownElement.SelectedOption?.Text)
+        TextureButtonData optionsButtonData = new TextureButtonData(ContentRegistry.UiButton,
+            hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        LabelData optionsButtonLabelData =
+            new LabelData(ContentRegistry.Fontoe, "Options", 18, hoverColor: Color.White);
+
+        this.AddElement("Options-Button", new TextureButtonElement(optionsButtonData, optionsButtonLabelData,
+            Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1),
+            clickFunc: (element) =>
             {
-                case "Host":
-                    GuiManager.SetGui(new HostGui());
-                    break;
+                GuiManager.SetGui(new OptionsGui());
+                return true;
+            }));
 
-                case "Join":
-                    GuiManager.SetGui(new JoinGui());
-                    break;
-            }
+        // Exit button.
+        TextureButtonData exitButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray,
+            resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        LabelData exitButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Exit", 18, hoverColor: Color.White);
 
-            return true;
-        }));
-        
+        this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center,
+            new Vector2(0, 180), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
+            {
+                Game.Instance?.ShouldClose = true;
+                return true;
+            }));
 
+        // Multiplayer button.
+        TextureButtonData multiplayerButtonData = new TextureButtonData(ContentRegistry.UiButton,
+            hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
+        LabelData multiplayerButtonLabelData =
+            new LabelData(ContentRegistry.Fontoe, "Multiplayer", 18, hoverColor: Color.White);
+
+        this.AddElement("Multiplayer-Button", new TextureButtonElement(multiplayerButtonData,
+            multiplayerButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40),
+            textOffset: new Vector2(0, 1), clickFunc: (element) =>
+            {
+                switch (multiplayerdropDownElement.SelectedOption?.Text)
+                {
+                    case "Host":
+                        GuiManager.SetGui(new HostGui());
+                        break;
+
+                    case "Join":
+                        GuiManager.SetGui(new JoinGui());
+                        break;
+                }
+
+                return true;
+            }));
     }
+
+
 
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
     {
         IWindow window = GlobalGraphicsAssets.Window;
-        
+
         // Background
         Texture2D backgroundTexture = ContentRegistry.Background2;
-        Vector2 backgroundSize = new Vector2((float) window.GetWidth() / backgroundTexture.Width, (float) window.GetHeight() / backgroundTexture.Height);
-        
+        Vector2 backgroundSize = new Vector2((float)window.GetWidth() / backgroundTexture.Width,
+            (float)window.GetHeight() / backgroundTexture.Height);
+
         context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
         context.SpriteBatch.DrawTexture(backgroundTexture, Vector2.Zero, scale: backgroundSize);
         context.SpriteBatch.End();
         
         base.Draw(context, framebuffer);
+
     }
 }

@@ -65,8 +65,7 @@ public class HostLeavedGui : Gui
 
             // Background
             Texture2D backgroundTexture = ContentRegistry.Background2;
-            Vector2 backgroundSize = new Vector2((float)window.GetWidth() / backgroundTexture.Width,
-                (float)window.GetHeight() / backgroundTexture.Height);
+            Vector2 backgroundSize = new Vector2((float)window.GetWidth() / backgroundTexture.Width, (float)window.GetHeight() / backgroundTexture.Height);
 
             context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
             context.SpriteBatch.DrawTexture(backgroundTexture, Vector2.Zero, scale: backgroundSize);

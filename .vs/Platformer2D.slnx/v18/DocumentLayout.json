@@ -3,8 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\NetworkManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Platformer2D\\CSharp\\NetworkManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\GUIs\\MenuGui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Platformer2D\\CSharp\\GUIs\\MenuGui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\PlatformerGame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Platformer2D\\CSharp\\PlatformerGame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\ContentRegistry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Platformer2D\\CSharp\\ContentRegistry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,6 +31,45 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "NetworkManager.cs",
+              "DocumentMoniker": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\NetworkManager.cs",
+              "RelativeDocumentMoniker": "Platformer2D\\CSharp\\NetworkManager.cs",
+              "ToolTip": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\NetworkManager.cs",
+              "RelativeToolTip": "Platformer2D\\CSharp\\NetworkManager.cs",
+              "ViewState": "AgIAAHIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T18:47:17.332Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PlatformerGame.cs",
+              "DocumentMoniker": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\PlatformerGame.cs",
+              "RelativeDocumentMoniker": "Platformer2D\\CSharp\\PlatformerGame.cs",
+              "ToolTip": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\PlatformerGame.cs",
+              "RelativeToolTip": "Platformer2D\\CSharp\\PlatformerGame.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T18:47:16.45Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ContentRegistry.cs",
+              "DocumentMoniker": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\ContentRegistry.cs",
+              "RelativeDocumentMoniker": "Platformer2D\\CSharp\\ContentRegistry.cs",
+              "ToolTip": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\ContentRegistry.cs",
+              "RelativeToolTip": "Platformer2D\\CSharp\\ContentRegistry.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-09T18:47:11.88Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "MenuGui.cs",
               "DocumentMoniker": "C:\\Users\\schne\\Documents\\GitHub\\Platformer2D\\Platformer2D\\CSharp\\GUIs\\MenuGui.cs",
               "RelativeDocumentMoniker": "Platformer2D\\CSharp\\GUIs\\MenuGui.cs",

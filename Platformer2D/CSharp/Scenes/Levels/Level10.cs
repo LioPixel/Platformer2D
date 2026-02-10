@@ -39,7 +39,10 @@ public class Level10 : LevelScene
     protected override void OnLevelWon()
     {
         // Da dies das neueste Level ist, laden wir es bei Sieg neu oder gehen zu Level 8
-        SceneManager.SetScene(new Level1());
+        if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
+        {
+            SceneManager.SetScene(new Level1());
+        }
     }
 
     public override void OnLevelReset()
@@ -51,8 +54,11 @@ public class Level10 : LevelScene
     {
         if (disposing)
         {
-            NetworkManager.Cleanup();
-            
+            // Only cleanup network if we're actually quitting, not during level transitions
+            if (!NetworkManager.IsLevelTransition)
+            {
+                NetworkManager.Cleanup();
+            }            
             base.Dispose(disposing);
         }
     }

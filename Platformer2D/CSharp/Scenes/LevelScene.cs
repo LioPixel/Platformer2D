@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Camera.Dim2;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Textures;
@@ -17,6 +18,7 @@ using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Content;
 using Veldrid;
 using Transform = Bliss.CSharp.Transformations.Transform;
 
@@ -27,6 +29,11 @@ public abstract class LevelScene : Scene
     
     public Texture2D? Background;
     public bool WonLevel;
+    
+    private Font _nameFont;
+    
+    // Track if we're in a network game
+    private bool _isNetworkGame = false;
     
     protected LevelScene(string name) : base(name, SceneType.Scene2D, null, () => new Simulation2D(new PhysicsSettings2D()
     {
@@ -39,6 +46,12 @@ public abstract class LevelScene : Scene
     protected override void Init()
     {
         base.Init();
+        
+        // Check if we're in a network game
+        _isNetworkGame = NetworkManager.Client != null && NetworkManager.Client.IsConnected;
+        
+        // Load font for player name
+        _nameFont = ContentRegistry.Fontoe;
         
         // CAMERA
         Rectangle size = new Rectangle(0, 0, GlobalGraphicsAssets.Window.GetWidth(), GlobalGraphicsAssets.Window.GetHeight());
@@ -85,8 +98,9 @@ public abstract class LevelScene : Scene
             }
         }
         
-        // Level won.
-        if (this.WonLevel)
+        // Level won - BUT only handle it if we're NOT in a network game
+        // In network games, the server will handle the transition
+        if (this.WonLevel && !_isNetworkGame)
         {
             this.OnLevelWon();
         }
@@ -96,6 +110,8 @@ public abstract class LevelScene : Scene
     {
         base.AfterUpdate(delta);
     }
+    
+    
 
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
     {
@@ -111,6 +127,41 @@ public abstract class LevelScene : Scene
         }
         
         base.Draw(context, framebuffer);
+        
+        // Draw player names
+        DrawPlayerNames(context, framebuffer);
+    }
+
+    private void DrawPlayerNames(GraphicsContext context, Framebuffer framebuffer)
+    {
+        Camera2D? cam2D = SceneManager.ActiveCam2D;
+        if (cam2D == null) return;
+
+        context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+
+        foreach (Entity entity in this.GetEntities())
+        {
+            if (entity is Player player)
+            {
+                // Berechne Screen-Position über dem Spieler
+                Vector3 worldPos = player.Transform.Translation;
+                Vector2 nameWorldPos = new Vector2(worldPos.X, worldPos.Y - 20); // 20 Pixel über Spieler
+            
+                // Konvertiere Welt-Position zu Screen-Position
+                Vector2 screenPos = cam2D.GetScreenToWorld(nameWorldPos);
+            
+                // Zeichne den Namen zentriert - ohne MeasureString
+                string displayName = "T";
+            
+                // Einfache Schätzung für Zentrierung (ca. 6 Pixel pro Buchstabe)
+                float estimatedWidth = displayName.Length * 6;
+                Vector2 centeredPos = new Vector2(screenPos.X - estimatedWidth / 2, screenPos.Y);
+            
+                context.SpriteBatch.DrawText(_nameFont, displayName, centeredPos, 30, layerDepth: 0.9F);
+            }
+        }
+
+        context.SpriteBatch.End();
     }
 
     protected abstract void OnLevelWon();

@@ -52,8 +52,10 @@ public class Level6 : LevelScene
 
     protected override void OnLevelWon()
     {
-        SceneManager.SetScene(new Level7());
-    }
+        if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
+        {
+            SceneManager.SetScene(new Level7());
+        }    }
 
     public override void OnLevelReset()
     {
@@ -64,8 +66,11 @@ public class Level6 : LevelScene
     {
         if (disposing)
         {
-            NetworkManager.Cleanup();
-            
+            // Only cleanup network if we're actually quitting, not during level transitions
+            if (!NetworkManager.IsLevelTransition)
+            {
+                NetworkManager.Cleanup();
+            }            
             base.Dispose(disposing);
         }
     }

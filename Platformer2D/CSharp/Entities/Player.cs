@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using Bliss.CSharp.Colors;
+using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Transformations;
@@ -15,6 +17,7 @@ using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Content;
 using Transform = Bliss.CSharp.Transformations.Transform;
 
 namespace Platformer2D.CSharp.Entities;
@@ -23,12 +26,12 @@ public class Player : Entity
 {
     public int IsPlayerOnGround;
     public PlayerPoseType PoseType;
-    
+
     // Network sync properties
     public bool IsLocalPlayer;
     public Vector3 NetworkedPosition;
     public PlayerPoseType NetworkedPoseType;
-    
+
     private Sprite _sprite;
     private float _timer;
     private int _frame;
@@ -36,24 +39,36 @@ public class Player : Entity
     private bool _isJumping;
     private const int TotalFrames = 8;
     private AudioSource _audioSource;
-    
+
     private readonly HashSet<ulong> _groundContacts = new();
     private readonly HashSet<ulong> _leftContacts = new();
     private readonly HashSet<ulong> _rightContacts = new();
-    
+
     private Vector2 _previousPlatformVelocity;
-    
+
     // Network update timer
     private float _networkUpdateTimer;
     private const float NetworkUpdateInterval = 0.05f; // Send updates 20 times per second
-    
+
     // Debug timer
     private float _networkDebugTimer;
-    
-    public Player(Transform transform, bool isLocalPlayer = true) : base(transform, "player") 
+
+    // Name display
+    private Font _nameFont;
+    private Vector2 _nameOffset = new Vector2(0, -20);
+
+    // Respawn system
+    private const float DEATH_Y = 100f; // Y-Position für Respawn (wenn Spieler runterfällt)
+    private Vector3 _spawnPoint;
+
+    // Level completion - prevent triggering multiple times
+    private bool _hasCompletedLevel = false;
+
+    public Player(Transform transform, bool isLocalPlayer = true) : base(transform, "player")
     {
         IsLocalPlayer = isLocalPlayer;
         NetworkedPosition = transform.Translation;
+        _spawnPoint = transform.Translation; // Merke Spawn-Position
     }
 
     protected override void Init()
@@ -63,7 +78,7 @@ public class Player : Entity
         this.NetworkedPoseType = PlayerPoseType.RightIdle;
         this._sprite = new Sprite(ContentRegistry.PlayerIdleRight, new Vector2(168, -2), layerDepth: 0.6F);
         this.AddComponent(this._sprite);
-        
+
         RigidBody2D body = new RigidBody2D(new BodyDefinition()
         {
             Type = IsLocalPlayer ? BodyType.Dynamic : BodyType.Kinematic,
@@ -78,13 +93,13 @@ public class Player : Entity
             // Collision filtering: players don't collide with each other but DO collide with blocks
             Filter = new Filter()
             {
-                CategoryBits = 0x0002,  // This is a player (category 2)
-                MaskBits = 0xFFFD       // Collide with everything (0xFFFF) EXCEPT other players (NOT 0x0002)
+                CategoryBits = 0x0002, // This is a player (category 2)
+                MaskBits = 0xFFFD // Collide with everything (0xFFFF) EXCEPT other players (NOT 0x0002)
             }
         }));
-        
+
         this.AddComponent(body);
-        
+
         body.CreateShape(new ShapeDef()
         {
             IsSensor = true,
@@ -98,7 +113,7 @@ public class Player : Entity
                 MaskBits = 0xFFFD
             }
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(-7, -1), Rotation.Identity));
-        
+
         body.CreateShape(new ShapeDef()
         {
             IsSensor = true,
@@ -112,7 +127,7 @@ public class Player : Entity
                 MaskBits = 0xFFFD
             }
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(7, -1), Rotation.Identity));
-        
+
         // Only subscribe to contact events for local player
         if (IsLocalPlayer)
         {
@@ -123,26 +138,35 @@ public class Player : Entity
         }
 
         this._audioSource = new AudioSource();
+        
+        // Load font for name display - passe den Pfad an deine Font-Datei an
+        this._nameFont = ContentRegistry.Fontoe; // Oder lade eine eigene Font
     }
 
     protected override void Update(double delta)
     {
         base.Update(delta);
-        
+
         // Handle networked player differently
         if (!IsLocalPlayer)
         {
             UpdateNetworkedPlayer(delta);
             return;
         }
-        
+
+        // Check if player fell too far
+        //if (this.Transform.Translation.Y > DEATH_Y)
+        //{
+        //    Respawn();
+        //}
+
         bool isGround = IsPlayerOnGround > 0;
         bool isLeftWallCol = _leftContacts.Count > 0;
         bool isRightWallCol = _rightContacts.Count > 0;
-        
+
         // Sprite animation.
         _timer += (float)delta;
-        
+
         if (_isJumping)
         {
             if (_timer >= _frameTime)
@@ -154,7 +178,7 @@ public class Player : Entity
                 {
                     _frame = 7;
                     _timer = 0;
-                    
+
                     if (isGround)
                     {
                         _timer = 0;
@@ -165,14 +189,14 @@ public class Player : Entity
                         {
                             this.PoseType = PlayerPoseType.LeftIdle;
                         }
-                        
+
                         if (this.PoseType == PlayerPoseType.JumpRight)
                         {
                             this.PoseType = PlayerPoseType.RightIdle;
                         }
                     }
                 }
-                
+
                 _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
             }
         }
@@ -189,7 +213,7 @@ public class Player : Entity
                 _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
             }
         }
-        
+
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
         Vector2 velocity = body.LinearVelocity;
 
@@ -200,7 +224,7 @@ public class Player : Entity
             float airAccel = 0.5f;
             float maxSpeed = 50f;
             float jumpForce = 90;
-            
+
             float input = 0f;
             if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
             {
@@ -211,7 +235,7 @@ public class Player : Entity
                     this.PoseType = PlayerPoseType.LeftWalk;
                 }
             }
-    
+
             if ((Input.IsKeyDown(KeyboardKey.D) || Input.IsKeyDown(KeyboardKey.Right)) && !isRightWallCol)
             {
                 input += 1f;
@@ -221,8 +245,9 @@ public class Player : Entity
                     this.PoseType = PlayerPoseType.RightWalk;
                 }
             }
-            
-            if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) && !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
+
+            if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) &&
+                !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
             {
                 if (!this._isJumping)
                 {
@@ -231,6 +256,7 @@ public class Player : Entity
                         this._frameTime = 0.2F;
                         this.PoseType = PlayerPoseType.LeftIdle;
                     }
+
                     if (this.PoseType == PlayerPoseType.RightWalk)
                     {
                         this._frameTime = 0.2F;
@@ -238,7 +264,7 @@ public class Player : Entity
                     }
                 }
             }
-    
+
             if (input != 0f)
             {
                 float accel = isGround ? groundAccel : airAccel;
@@ -249,15 +275,15 @@ public class Player : Entity
             {
                 velocity.X *= 0.8f;
             }
-    
+
             // Jump
-            if ((Input.IsKeyPressed(KeyboardKey.Space) 
+            if ((Input.IsKeyPressed(KeyboardKey.Space)
                  || Input.IsKeyPressed(KeyboardKey.W)
                  || Input.IsKeyPressed(KeyboardKey.Up))
                 && isGround && !_isJumping)
             {
                 velocity.Y = -jumpForce;
-                
+
                 if (this.PoseType == PlayerPoseType.LeftWalk || this.PoseType == PlayerPoseType.LeftIdle)
                 {
                     this._frameTime = 0.1F;
@@ -265,6 +291,7 @@ public class Player : Entity
                     this._frame = 0;
                     this.PoseType = PlayerPoseType.JumpLeft;
                 }
+
                 if (this.PoseType == PlayerPoseType.RightWalk || this.PoseType == PlayerPoseType.RightIdle)
                 {
                     this._frameTime = 0.1F;
@@ -272,7 +299,7 @@ public class Player : Entity
                     this._frame = 0;
                     this.PoseType = PlayerPoseType.JumpRight;
                 }
-    
+
                 this._isJumping = true;
 
                 if (((PlatformerGame)Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"))
@@ -283,7 +310,7 @@ public class Player : Entity
         }
 
         body.LinearVelocity = velocity;
-        
+
         // Network position sync
         _networkUpdateTimer += (float)delta;
         if (_networkUpdateTimer >= NetworkUpdateInterval)
@@ -291,33 +318,51 @@ public class Player : Entity
             _networkUpdateTimer = 0;
             NetworkManager.SendPlayerPosition(this.Transform.Translation, this.PoseType);
         }
-        
+
         // Game over!
         this.GameOver();
-        
+
         // Set sprite type.
         this.SetSpriteByPoseType();
     }
+
+    private void Respawn()
+    {
+        this.Transform.Translation = _spawnPoint;
+        RigidBody2D body = this.GetComponent<RigidBody2D>()!;
+        body.LinearVelocity = Vector2.Zero; // Reset velocity
+        
+        // Optional: Spiele einen Sound ab
+        // if (((PlatformerGame)Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"))
+        // {
+        //     this._audioSource.Play(ContentRegistry.RespawnSound);
+        // }
+    }
     
+    public void SetSpawnPoint(Vector3 spawnPoint)
+    {
+        _spawnPoint = spawnPoint;
+    }
+
     private void UpdateNetworkedPlayer(double delta)
     {
         // Update pose type
         this.PoseType = NetworkedPoseType;
-        
+
         // Directly set position from network data
         // For kinematic bodies, we set the transform directly
         this.Transform.Translation = NetworkedPosition;
-        
+
         // Debug every second
         _networkDebugTimer += (float)delta;
         if (_networkDebugTimer >= 1.0f)
         {
             _networkDebugTimer = 0;
         }
-        
+
         // Update sprite animation
         _timer += (float)delta;
-        
+
         if (_timer >= _frameTime)
         {
             _timer = 0f;
@@ -328,7 +373,7 @@ public class Player : Entity
 
             _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
         }
-        
+
         // Set sprite type
         this.SetSpriteByPoseType();
     }
@@ -336,12 +381,12 @@ public class Player : Entity
     protected override void FixedUpdate(double fixedStep)
     {
         base.FixedUpdate(fixedStep);
-        
+
         // Only apply physics to local player
         if (!IsLocalPlayer) return;
-    
+
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
-    
+
         Vector2 platformVelocity = Vector2.Zero;
 
         foreach (ContactData contact in body.Contacts)
@@ -355,14 +400,14 @@ public class Player : Entity
                 platformVelocity = contact.ShapeB.Body.LinearVelocity;
             }
         }
-    
+
         body.LinearVelocity += new Vector2(platformVelocity.X, 0);
     }
 
     public void GameOver()
     {
         if (!IsLocalPlayer) return;
-        
+
         if (this.Transform.Translation.Y >= 5 * 16)
         {
             GuiManager.SetGui(new GameOverGui());
@@ -376,7 +421,7 @@ public class Player : Entity
         {
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
         }
-        
+
         if ((e.SensorShape.UserData?.ToString() == "PlayerRightSensor") ||
             e.VisitorShape.UserData?.ToString() == "PlayerRightSensor")
         {
@@ -401,24 +446,59 @@ public class Player : Entity
                 IsPlayerOnGround = _groundContacts.Count;
             }
         }
-        
+
         if ((e.ShapeA.UserData?.ToString() == "flag") ||
             e.ShapeB.UserData?.ToString() == "flag")
         {
             ((LevelScene)this.Scene).WonLevel = true;
+            
+            // Only the local player should trigger network level completion
+            if (IsLocalPlayer && !_hasCompletedLevel)
+            {
+                _hasCompletedLevel = true;
+                OnLevelComplete();
+            }
         }
-        
+
         if (e.ShapeA.UserData is Portal entity1)
         {
             this.Transform.Translation = new Vector3(entity1.TeleportPos, 0);
             SceneManager.ActiveCam2D!.Position = entity1.TeleportPos;
         }
-        
+
         if (e.ShapeB.UserData is Portal entity2)
         {
             this.Transform.Translation = new Vector3(entity2.TeleportPos, 0);
             SceneManager.ActiveCam2D!.Position = entity2.TeleportPos;
         }
+    }
+
+    private void OnLevelComplete()
+    {
+        // Determine the next level based on current scene
+        string nextLevel = DetermineNextLevel();
+        
+        Bliss.CSharp.Logging.Logger.Info($"[PLAYER] Level completed! Moving all players to: {nextLevel}");
+        
+        // Notify the server to move all players to the next level
+        NetworkManager.NotifyLevelComplete(nextLevel);
+    }
+
+    private string DetermineNextLevel()
+    {
+        // Check what the current scene is and determine next level
+        if (this.Scene is Platformer2D.CSharp.Scenes.Levels.Level1)
+        {
+            return "Level 2";
+        }
+        else if (this.Scene is Platformer2D.CSharp.Scenes.Levels.Level2)
+        {
+            // You can add Level 3 here, or loop back to Level 1, or show victory screen
+            return "Level 1"; // Change this to "Level 3" if you have a third level
+        }
+        
+        // Default fallback
+        return "Level 1";
     }
 
     private void ContactEndTouch(ContactEndTouchEvent e)
@@ -454,7 +534,7 @@ public class Player : Entity
                 break;
         }
     }
-    
+
     private ulong ContactKey(Shape a, Shape b)
     {
         unchecked
@@ -464,7 +544,7 @@ public class Player : Entity
             return ha < hb ? (ha << 32) ^ hb : (hb << 32) ^ ha;
         }
     }
-    
+
     private bool IsGroundContact(ContactBeginTouchEvent e)
     {
         bool footIsA = e.ShapeA.UserData?.ToString() == "Player";
@@ -480,7 +560,7 @@ public class Player : Entity
 
         return Vector2.Dot(n, -g) > 0.6f;
     }
-    
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
