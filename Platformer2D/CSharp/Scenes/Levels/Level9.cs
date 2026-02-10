@@ -45,11 +45,7 @@ public class Level9 : LevelScene
         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
         {
             SceneManager.SetScene(new Level10());
-        }    }
-
-    public override void OnLevelReset()
-    {
-        SceneManager.SetScene(new Level9());
+        }
     }
     
     protected override void Dispose(bool disposing)

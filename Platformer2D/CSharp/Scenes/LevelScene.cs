@@ -166,8 +166,6 @@ public abstract class LevelScene : Scene
 
     protected abstract void OnLevelWon();
     
-    public abstract void OnLevelReset();
-
     protected void CreatePlatform(int blockPosX, int blockPosY, int length)
     {
         for (int i = 0; i < length; i++)

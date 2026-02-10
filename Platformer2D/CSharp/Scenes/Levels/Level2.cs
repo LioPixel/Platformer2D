@@ -34,11 +34,6 @@ public class Level2 : LevelScene
         }
     }
     
-    public override void OnLevelReset()
-    {
-        SceneManager.SetScene(new Level2());
-    }
-    
     protected override void Dispose(bool disposing)
     {
         if (disposing)
