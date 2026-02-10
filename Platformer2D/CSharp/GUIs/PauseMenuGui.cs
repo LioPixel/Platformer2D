@@ -3,7 +3,10 @@ using Bliss.CSharp.Colors;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Transformations;
+using Platformer2D.CSharp.Entities;
 using Platformer2D.CSharp.Scenes;
+using Sparkle.CSharp.Entities;
+using Sparkle.CSharp.Entities.Components;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -58,9 +61,27 @@ public class PauseMenuGui : Gui
         this.AddElement("Reset-Button", new TextureButtonElement(resetButtonData, resetButtonLabelData, Anchor.Center, new Vector2(0, 120), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element ) => {
             if (SceneManager.ActiveScene is LevelScene level)
             {
-                level.OnLevelReset();
+                foreach (Entity entity in level.GetEntities())
+                {
+                    if (entity is Player player)
+                    {
+                        if (player.IsLocalPlayer)
+                        {
+                            player.Transform.Translation = new Vector3(0, -16 * 2, 0);
+                            player.GetComponent<RigidBody2D>()?.Awake = true;
+                            SceneManager.ActiveCam2D?.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);   
+                        }
+                                                
+                        if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
+                        {
+                            player.Transform.Translation = new Vector3(0, -16 * 2, 0);
+                            player.GetComponent<RigidBody2D>()?.Awake = true;
+                            SceneManager.ActiveCam2D?.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);   
+                        }
+                    }
+                }
             }
-            
+
             GuiManager.SetGui(null);
             return true;
         }));

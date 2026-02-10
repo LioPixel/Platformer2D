@@ -8,6 +8,7 @@ using Box2D;
 using MiniAudioEx.Core.StandardAPI;
 using Platformer2D.CSharp.GUIs;
 using Platformer2D.CSharp.Scenes;
+using Platformer2D.CSharp.Scenes.Levels;
 using Riptide;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
@@ -487,14 +488,41 @@ public class Player : Entity
     private string DetermineNextLevel()
     {
         // Check what the current scene is and determine next level
-        if (this.Scene is Platformer2D.CSharp.Scenes.Levels.Level1)
+        if (this.Scene is Level1)
         {
             return "Level 2";
         }
-        else if (this.Scene is Platformer2D.CSharp.Scenes.Levels.Level2)
+        else if (this.Scene is Level2)
         {
-            // You can add Level 3 here, or loop back to Level 1, or show victory screen
-            return "Level 1"; // Change this to "Level 3" if you have a third level
+            return "Level 3";
+        }
+        else if (this.Scene is Level3)
+        {
+            return "Level 4";
+        }
+        else if (this.Scene is Level4)
+        {
+            return "Level 5";
+        }
+        else if (this.Scene is Level5)
+        {
+            return "Level 6";
+        }
+        else if (this.Scene is Level6)
+        {
+            return "Level 7";
+        }
+        else if (this.Scene is Level7)
+        {
+            return "Level 8";
+        }
+        else if (this.Scene is Level8)
+        {
+            return "Level 9";
+        }
+        else if (this.Scene is Level9)
+        {
+            return "Level 10";
         }
         
         // Default fallback

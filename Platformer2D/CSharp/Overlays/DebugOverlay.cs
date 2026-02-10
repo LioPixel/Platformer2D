@@ -23,30 +23,6 @@ public class DebugOverlay : Overlay
     {
     }
 
-    protected override void Update(double delta)
-    {
-        base.Update(delta);
-        
-        // Debug Reset Button.
-
-        if (Input.IsKeyPressed(KeyboardKey.E))
-        {
-            if (SceneManager.ActiveScene is LevelScene level)
-            {
-                Vector3? prevPlayerPos = level.GetEntitiesWithTag("player").FirstOrDefault()?.Transform.Translation;
-                level.OnLevelReset();
-
-                Entity? player = SceneManager.ActiveScene.GetEntitiesWithTag("player").FirstOrDefault();
-
-                if (player != null)
-                {
-                    player.Transform.Translation = prevPlayerPos ?? Vector3.Zero;
-                    SceneManager.ActiveCam2D!.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);
-                }
-            }
-        }
-    }
-
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
     {
         Camera2D? cam = SceneManager.ActiveCam2D;
