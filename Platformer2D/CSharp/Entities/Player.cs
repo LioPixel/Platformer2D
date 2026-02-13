@@ -50,7 +50,7 @@ public class Player : Entity
 
     // Network update timer
     private float _networkUpdateTimer;
-    private const float NetworkUpdateInterval = 0.05f; // Send updates 20 times per second
+    private const float NetworkUpdateInterval = 0.016f; // Send updates 60 times per second
 
     // Debug timer
     private float _networkDebugTimer;
