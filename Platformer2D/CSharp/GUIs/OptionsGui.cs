@@ -60,10 +60,10 @@ public class OptionsGui : Gui
         ToggleData debugModeToggleData = new ToggleData(ContentRegistry.ToggleBackground, ContentRegistry.ToggleCheckmark, checkboxHoverColor: Color.LightGray, checkmarkHoverColor: Color.LightGray);
         LabelData debugModeToggleLabelData = new LabelData(ContentRegistry.Fontoe, "Debug Mode", 18);
         
-        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(19, -70), 5, toggleState: OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled, clickFunc: (element) =>
+        this.AddElement("Toggle-DebugMode", new ToggleElement(debugModeToggleData, debugModeToggleLabelData, Anchor.Center, new Vector2(19, -70), 5, toggleState: ((PlatformerGame) PlatformerGame.Instance).OptionsConfig.GetValue<bool>("DebugMode"), clickFunc: (element) =>
         {
-            bool condition = !OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled;
-            OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled = condition;
+            bool condition = !((PlatformerGame) PlatformerGame.Instance).OptionsConfig.GetValue<bool>("DebugMode");
+            //OverlayManager.GetOverlays().First(overlay => overlay.Name == "Debug").Enabled = condition;
             ((PlatformerGame) Game.Instance!).OptionsConfig.SetValue("DebugMode", condition);
             return true;
         }));

@@ -2,6 +2,7 @@
 using Bliss.CSharp.Colors;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Transformations;
+using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.Overlays;
@@ -12,6 +13,10 @@ namespace Platformer2D.CSharp.Overlays;
 
 public class DebugOverlay : Overlay
 {
+    
+    private float _fpsTimer;
+    private int _fpsFrames;
+    private int _fps;
     
     public DebugOverlay(string name, bool enabled = false) : base(name, enabled)
     {
@@ -26,18 +31,28 @@ public class DebugOverlay : Overlay
             return;
         }
         
-        Vector2 mousePos = Input.GetMousePosition();
-        Vector2 mouseWorldPos = cam.GetScreenToWorld(mousePos);
+        if (((PlatformerGame) PlatformerGame.Instance).OptionsConfig.GetValue<bool>("DebugMode"))
+        {
+            Vector2 mousePos = Input.GetMousePosition();
+            Vector2 mouseWorldPos = cam.GetScreenToWorld(mousePos);
         
-        Vector2 mouseBlock = new Vector2(
-            (int) Math.Floor((mouseWorldPos.X + 8) / 16f),
-            (int) Math.Floor((mouseWorldPos.Y + 8) / 16f)
-        );
+            Vector2 mouseBlock = new Vector2(
+                (int) Math.Floor((mouseWorldPos.X + 8) / 16f),
+                (int) Math.Floor((mouseWorldPos.Y + 8) / 16f)
+            );
         
-        this.DrawBlockHighlight(context, framebuffer, cam, mouseBlock);
+            this.DrawBlockHighlight(context, framebuffer, cam, mouseBlock);
+        
+        
+            context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+            context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"POS: {mouseBlock}", mousePos, 18, color: Color.Black);
+            context.SpriteBatch.End();
+
+        }
         
         context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
-        context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"POS: {mouseBlock}", mousePos, 18, color: Color.Black);
+        context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"FPS: {this.GetFps()}", new Vector2(5, 5), 18, color: Color.LightGray);
+        context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"LEVEL NAME: {SceneManager.ActiveScene?.Name}", new Vector2(5, 25), 18, color: Color.LightGray);
         context.SpriteBatch.End();
     }
 
@@ -59,5 +74,21 @@ public class DebugOverlay : Overlay
         );
 
         context.PrimitiveBatch.End();
+    }
+    
+        
+    private int GetFps()
+    {
+        this._fpsFrames++;
+        this._fpsTimer += (float) Time.Delta;
+
+        if (this._fpsTimer >= 0.25f) // update once per second
+        {
+            this._fps = (int) (this._fpsFrames / this._fpsTimer);
+            this._fpsFrames = 0;
+            this._fpsTimer = 0;
+        }
+        
+        return this._fps;
     }
 }

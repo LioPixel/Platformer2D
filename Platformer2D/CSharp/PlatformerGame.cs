@@ -39,7 +39,7 @@ public class PlatformerGame : Game
     {
         base.Init();
         GuiManager.SetGui(new MenuGui());
-        OverlayManager.AddOverlay(new DebugOverlay("Debug", this.OptionsConfig.GetValue<bool>("DebugMode")));
+        OverlayManager.AddOverlay(new DebugOverlay("Debug", true));
         AudioContext.MasterVolume = ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<float>("MasterVolume");
     }
 
