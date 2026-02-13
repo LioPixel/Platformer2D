@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Graphics.Rendering.Renderers.Batches.Sprites;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Logging;
@@ -123,6 +124,15 @@ public class HostGui : Gui
         
         this.AddElement("Texture-Drop-Down", dropDownElement);
         
+        // Texture text box.
+        TextureTextBoxData nameTextBoxData = new TextureTextBoxData(ContentRegistry.UiMenu, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12), flip: SpriteFlip.None);
+        LabelData nameTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "", 18, hoverColor: Color.White);
+        LabelData nameHintTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "Type your name...", 18, color: Color.Gray);
+        
+        this.AddElement("Name-Text-Box", new TextureTextBoxElement(nameTextBoxData, nameTextBoxLabelData, nameHintTextBoxLabelData, Anchor.Center, new Vector2(120, -120), 15, TextAlignment.Center, new Vector2(0, 1), (12, 12), new Vector2(230, 30), rotation: 0, clickFunc: (element) => {
+            return true;
+        }));
+        
         // Host button.
         TextureButtonData createButtonData = new TextureButtonData(ContentRegistry.UiButton, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12));
         LabelData createButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Host", 18, hoverColor: Color.White);
@@ -133,7 +143,15 @@ public class HostGui : Gui
             
             if (slideBarElement is TextureSlideBarElement slideBar)
             {
-                NetworkManager.CreateServer((ushort) slideBar.Value, dropDownElement.SelectedOption?.Text ?? "Level 1");
+                TextureTextBoxElement nameTextBox = (TextureTextBoxElement)this.GetElement("Name-Text-Box");
+                string username = nameTextBox.LabelData.Text.Trim();
+                
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    username = "Player";
+                }
+                
+                NetworkManager.CreateServer((ushort) slideBar.Value, dropDownElement.SelectedOption?.Text ?? "Level 1", username);
                 GuiManager.SetGui(null);
                 Logger.Info("SERVER STARTED!!!!");
             }

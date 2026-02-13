@@ -10,6 +10,7 @@ using Bliss.CSharp.Windowing;
 using Box2D;
 using Platformer2D.CSharp.Entities;
 using Platformer2D.CSharp.GUIs;
+using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
 using Sparkle.CSharp.Graphics;
@@ -26,6 +27,10 @@ namespace Platformer2D.CSharp.Scenes;
 public abstract class LevelScene : Scene
 {
     
+    private float _fpsTimer;
+    private int _fpsFrames;
+    private int _fps;
+    
     public Texture2D? Background;
     public bool WonLevel;
     
@@ -41,6 +46,7 @@ public abstract class LevelScene : Scene
             Gravity = new Vector2(0, 9.81F),
         }
     })) { }
+    
 
     protected override void Init()
     {
@@ -77,6 +83,10 @@ public abstract class LevelScene : Scene
             }
         }
 
+        if (Input.IsKeyReleased(KeyboardKey.L))
+        {
+            Game.Instance?.Dispose();
+        }
         
         Camera2D? cam2D = SceneManager.ActiveCam2D;
 
@@ -125,44 +135,16 @@ public abstract class LevelScene : Scene
             context.SpriteBatch.End();
         }
         
+        context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+        context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"FPS: {this.GetFps()}", new Vector2(5, 5), 18, color: Color.LightGray);
+        context.SpriteBatch.DrawText(ContentRegistry.Fontoe, $"LEVEL NAME: {SceneManager.ActiveScene?.Name}", new Vector2(5, 25), 18, color: Color.LightGray);
+        context.SpriteBatch.End();
+        
         base.Draw(context, framebuffer);
         
         // Draw player names
-        DrawPlayerNames(context, framebuffer);
     }
-
-    private void DrawPlayerNames(GraphicsContext context, Framebuffer framebuffer)
-    {
-        Camera2D? cam2D = SceneManager.ActiveCam2D;
-        if (cam2D == null) return;
-
-        context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
-
-        foreach (Entity entity in this.GetEntities())
-        {
-            if (entity is Player player)
-            {
-                // Berechne Screen-Position über dem Spieler
-                Vector3 worldPos = player.Transform.Translation;
-                Vector2 nameWorldPos = new Vector2(worldPos.X, worldPos.Y - 20); // 20 Pixel über Spieler
-            
-                // Konvertiere Welt-Position zu Screen-Position
-                Vector2 screenPos = cam2D.GetScreenToWorld(nameWorldPos);
-            
-                // Zeichne den Namen zentriert - ohne MeasureString
-                string displayName = "T";
-            
-                // Einfache Schätzung für Zentrierung (ca. 6 Pixel pro Buchstabe)
-                float estimatedWidth = displayName.Length * 6;
-                Vector2 centeredPos = new Vector2(screenPos.X - estimatedWidth / 2, screenPos.Y);
-            
-                context.SpriteBatch.DrawText(_nameFont, displayName, centeredPos, 30, layerDepth: 0.9F);
-            }
-        }
-
-        context.SpriteBatch.End();
-    }
-
+    
     protected abstract void OnLevelWon();
     
     protected void CreatePlatform(int blockPosX, int blockPosY, int length)
@@ -293,5 +275,21 @@ public abstract class LevelScene : Scene
     {
         Up,
         Down
+    }
+    
+    
+    private int GetFps()
+    {
+        this._fpsFrames++;
+        this._fpsTimer += (float) Time.Delta;
+
+        if (this._fpsTimer >= 0.25f) // update once per second
+        {
+            this._fps = (int) (this._fpsFrames / this._fpsTimer);
+            this._fpsFrames = 0;
+            this._fpsTimer = 0;
+        }
+        
+        return this._fps;
     }
 }

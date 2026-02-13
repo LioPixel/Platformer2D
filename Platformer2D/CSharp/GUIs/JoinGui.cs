@@ -45,10 +45,10 @@ public class JoinGui : Gui
             return true;
         }));
         
-        // Texture text box.
+        // IP address text box.
         TextureTextBoxData textureTextBoxData = new TextureTextBoxData(ContentRegistry.UiMenu, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12), flip: SpriteFlip.None);
         LabelData textureTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "", 18, hoverColor: Color.White);
-        LabelData textureHintTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "Type IP adress...", 18, color: Color.Gray);
+        LabelData textureHintTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "Type IP address...", 18, color: Color.Gray);
         
         this.AddElement("Texture-Text-Box", new TextureTextBoxElement(textureTextBoxData, textureTextBoxLabelData, textureHintTextBoxLabelData, Anchor.Center, new Vector2(0, -10), 40, TextAlignment.Center, new Vector2(0, 1), (12, 12), new Vector2(260, 30), rotation: 0, clickFunc: (element) => {
             return true;
@@ -70,18 +70,36 @@ public class JoinGui : Gui
         // Error message label (initially empty)
         LabelData errorLabelData = new LabelData(ContentRegistry.Fontoe, "", 18, color: Color.Red);
         this.AddElement("Error-Label", new LabelElement(errorLabelData, Anchor.Center, new Vector2(0, 110), new Vector2(1, 1)));
+        
+        // Username text box.
+        TextureTextBoxData nameTextBoxData = new TextureTextBoxData(ContentRegistry.UiMenu, hoverColor: Color.LightGray, resizeMode: ResizeMode.NineSlice, borderInsets: new BorderInsets(12), flip: SpriteFlip.None);
+        LabelData nameTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "", 18, hoverColor: Color.White);
+        LabelData nameHintTextBoxLabelData = new LabelData(ContentRegistry.Fontoe, "Type your name...", 18, color: Color.Gray);
+        
+        this.AddElement("Name-Text-Box", new TextureTextBoxElement(nameTextBoxData, nameTextBoxLabelData, nameHintTextBoxLabelData, Anchor.Center, new Vector2(120, -120), 15, TextAlignment.Center, new Vector2(0, 1), (12, 12), new Vector2(230, 30), rotation: 0, clickFunc: (element) => {
+            return true;
+        }));
     }
     
     private void TryJoinServer()
     {
         // Get IP from text box
-        TextureTextBoxElement textBox = (TextureTextBoxElement)this.GetElement("Texture-Text-Box");
-        string ipAddress = textBox.LabelData.Text.Trim();
+        TextureTextBoxElement ipTextBox = (TextureTextBoxElement)this.GetElement("Texture-Text-Box");
+        string ipAddress = ipTextBox.LabelData.Text.Trim();
+        
+        // Get username from text box
+        TextureTextBoxElement nameTextBox = (TextureTextBoxElement)this.GetElement("Name-Text-Box");
+        string username = nameTextBox.LabelData.Text.Trim();
         
         // Use default if empty
         if (string.IsNullOrWhiteSpace(ipAddress))
         {
             ipAddress = "127.0.0.1:7777";
+        }
+        
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            username = "Player";
         }
         
         _isConnecting = true;
@@ -91,8 +109,8 @@ public class JoinGui : Gui
         // Set up connection callbacks
         NetworkManager.SetConnectionCallbacks(OnConnectionSuccess, OnConnectionFailed);
         
-        // Attempt to join
-        NetworkManager.JoinServer(ipAddress);
+        // Attempt to join with username
+        NetworkManager.JoinServer(ipAddress, username);
     }
     
     private void OnConnectionSuccess()

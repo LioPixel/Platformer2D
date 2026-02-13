@@ -22,6 +22,7 @@ public class PlatformerGame : Game
         jsonConfigBuilder.Add("DebugMode", false);
         jsonConfigBuilder.Add("Sounds", true);
         jsonConfigBuilder.Add("MasterVolume", 0.5F);
+        jsonConfigBuilder.Add("Toggle-Fps", true);
         this.OptionsConfig = jsonConfigBuilder.Build();
     }
 

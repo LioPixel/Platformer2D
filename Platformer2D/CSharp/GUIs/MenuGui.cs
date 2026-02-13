@@ -282,8 +282,6 @@ public class MenuGui : Gui
             }));
     }
 
-
-
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
     {
         IWindow window = GlobalGraphicsAssets.Window;

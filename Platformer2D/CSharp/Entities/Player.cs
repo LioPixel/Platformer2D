@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Bliss.CSharp.Colors;
 using Bliss.CSharp.Fonts;
 using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
@@ -11,17 +12,20 @@ using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
+using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
 using Sparkle.CSharp.Physics.Dim2.Shapes;
 using Sparkle.CSharp.Scenes;
+using Veldrid;
 using Transform = Bliss.CSharp.Transformations.Transform;
 
 namespace Platformer2D.CSharp.Entities;
 
 public class Player : Entity
 {
+    public string UserName { get; private set; }
     public int IsPlayerOnGround;
     public PlayerPoseType PoseType;
 
@@ -62,9 +66,10 @@ public class Player : Entity
     // Level completion - prevent triggering multiple times
     private bool _hasCompletedLevel = false;
 
-    public Player(Transform transform, bool isLocalPlayer = true) : base(transform, "player")
+    public Player(Transform transform, bool isLocalPlayer = true, string userName = "") : base(transform, "player")
     {
         IsLocalPlayer = isLocalPlayer;
+        UserName = userName;
         NetworkedPosition = transform.Translation;
         _spawnPoint = transform.Translation; // Merke Spawn-Position
     }
@@ -400,6 +405,21 @@ public class Player : Entity
         }
 
         body.LinearVelocity += new Vector2(platformVelocity.X, 0);
+    }
+
+    protected override void Draw(GraphicsContext context, Framebuffer framebuffer)
+    {
+        base.Draw(context, framebuffer);
+
+        if (this.UserName != string.Empty)
+        {
+            context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription, view: SceneManager.ActiveCam2D?.GetView());
+            Vector2 scale = new Vector2(0.25F, 0.25F);
+            Vector2 textSize = ContentRegistry.Fontoe.MeasureText(this.UserName, 18, scale);
+            Vector2 namePos = new Vector2(this.Transform.Translation.X - textSize.X / 2.0F, this.Transform.Translation.Y - 22);
+            context.SpriteBatch.DrawText(ContentRegistry.Fontoe, this.UserName, namePos, 18, scale: scale, color: Color.Gray);
+            context.SpriteBatch.End();
+        }
     }
 
     public void GameOver()

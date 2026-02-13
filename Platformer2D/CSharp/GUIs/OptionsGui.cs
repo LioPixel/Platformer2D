@@ -78,7 +78,7 @@ public class OptionsGui : Gui
         }));
         
         LabelData masterVolumeLabelData = new LabelData(ContentRegistry.Fontoe, "Master Volume", 18);
-        this.AddElement("Master-Volume", new LabelElement(masterVolumeLabelData, Anchor.Center, new Vector2(0, 25)));
+        this.AddElement("Master-Volume", new LabelElement(masterVolumeLabelData, Anchor.Center, new Vector2(0, 100)));
         
         // Texture slider bar.
         TextureSlideBarData textureSlideBarData = new TextureSlideBarData(
@@ -90,7 +90,7 @@ public class OptionsGui : Gui
             barBorderInsets: new BorderInsets(3),
             filledBarBorderInsets: new BorderInsets(3));
         
-        this.AddElement("Texture-Slider-Bar", new TextureSlideBarElement(textureSlideBarData, Anchor.Center, new Vector2(0, 50), 0, 1, value: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<float>("MasterVolume"), wholeNumbers: false, size: new Vector2(140, 8), scale: new Vector2(2, 2), clickFunc: (element) => {
+        this.AddElement("Texture-Slider-Bar", new TextureSlideBarElement(textureSlideBarData, Anchor.Center, new Vector2(0, 130), 0, 1, value: ((PlatformerGame) Game.Instance!).OptionsConfig.GetValue<float>("MasterVolume"), wholeNumbers: false, size: new Vector2(140, 8), scale: new Vector2(2, 2), clickFunc: (element) => {
             return true;
         }));
     }
@@ -128,7 +128,7 @@ public class OptionsGui : Gui
         }
         
         float scale = this.ScaleFactor;
-            
+
         // Define base virtual size (e.g., half of 1280x720) and scale it
         Vector2 baseSize = new Vector2(550, 310);
         Vector2 scaledSize = baseSize * scale;

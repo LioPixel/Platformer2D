@@ -21,6 +21,9 @@ public static class NetworkManager
     // Dictionary to track all networked players by their client ID
     public static Dictionary<ushort, Player> NetworkedPlayers = new();
     
+    // Dictionary to track player usernames by their client ID
+    public static Dictionary<ushort, string> PlayerUsernames = new();
+    
     // Flag to prevent showing HostLeavedGui during level transitions
     private static bool _isLevelTransition = false;
     
@@ -41,9 +44,12 @@ public static class NetworkManager
         Client?.Update();
     }
 
-    public static void CreateServer(ushort slots, string levelName)
+    public static void CreateServer(ushort slots, string levelName, string hostUsername)
     {
         _currentLevel = levelName;
+        
+        // Store the host username so it can be used when the host client connects
+        _pendingUsername = hostUsername;
         
         Server = new Server();
         Server.Start(7777, slots);
@@ -63,7 +69,7 @@ public static class NetworkManager
             message.AddInt(sceneInt);
             message.AddUShort(args.Client.Id);
             
-            // Send list of existing player IDs
+            // Send list of existing player IDs and their usernames
             List<ushort> existingPlayerIds = new List<ushort>();
             for (ushort i = 1; i < args.Client.Id; i++)
             {
@@ -79,16 +85,13 @@ public static class NetworkManager
             foreach (ushort playerId in existingPlayerIds)
             {
                 message.AddUShort(playerId);
+                message.AddString(PlayerUsernames.ContainsKey(playerId) ? PlayerUsernames[playerId] : "Player");
             }
             
             Server.Send(message, args.Client);
             
-            // Notify all other clients about the new player
-            Message spawnMessage = Message.Create(MessageSendMode.Reliable, 3);
-            spawnMessage.AddUShort(args.Client.Id);
-            Server.SendToAll(spawnMessage, args.Client.Id);
-            
-            Logger.Info($"[SERVER] Notified all clients about new player {args.Client.Id}");
+            // Wait to receive the new player's username before notifying others
+            // This will be handled in HandleClientUsernameMessage (message ID 8)
         };
         
         Server.ClientDisconnected += (sender, args) =>
@@ -97,6 +100,7 @@ public static class NetworkManager
             
             // Remove from server's player list
             NetworkedPlayers.Remove(args.Client.Id);
+            PlayerUsernames.Remove(args.Client.Id);
             
             // Notify all REMAINING clients to remove this player
             Message despawnMessage = Message.Create(MessageSendMode.Reliable, 4);
@@ -117,7 +121,7 @@ public static class NetworkManager
         Client.Disconnected += OnClientDisconnected;
         Client.MessageReceived += HandleClientMessageReceived;
         Client.Connect("127.0.0.1:7777");
-        Logger.Info("[CLIENT] Host connecting to own server at 127.0.0.1:7777");
+        Logger.Info($"[CLIENT] Host connecting to own server with username: {hostUsername}");
     }
     
     // Helper method to convert level name to int
@@ -166,7 +170,29 @@ public static class NetworkManager
             case 6: // Level completion
                 HandleLevelCompletion(e.Message, e.FromConnection.Id);
                 break;
+            case 8: // Username from client
+                HandleClientUsernameMessage(e.Message, e.FromConnection.Id);
+                break;
         }
+    }
+    
+    // Handle username message from client
+    private static void HandleClientUsernameMessage(Message message, ushort fromClientId)
+    {
+        string username = message.GetString();
+        
+        Logger.Info($"[SERVER] Received username '{username}' from client {fromClientId}");
+        
+        // Store the username
+        PlayerUsernames[fromClientId] = username;
+        
+        // Now notify all other clients about the new player with their username
+        Message spawnMessage = Message.Create(MessageSendMode.Reliable, 3);
+        spawnMessage.AddUShort(fromClientId);
+        spawnMessage.AddString(username);
+        Server.SendToAll(spawnMessage, fromClientId);
+        
+        Logger.Info($"[SERVER] Notified all clients about new player {fromClientId} ({username})");
     }
     
     // Handle level completion from a client
@@ -212,6 +238,7 @@ public static class NetworkManager
         
         // Remove from server's player list
         NetworkedPlayers.Remove(playerId);
+        PlayerUsernames.Remove(playerId);
         
         // Notify ALL OTHER clients to remove this player
         Message despawnMessage = Message.Create(MessageSendMode.Reliable, 4);
@@ -263,17 +290,18 @@ public static class NetworkManager
         
         _isLevelTransition = true;
         
-        // Remember all player IDs (except local)
-        List<ushort> remotePlayerIds = new List<ushort>();
+        // Remember all player IDs and usernames (except local)
+        Dictionary<ushort, string> remotePlayersWithUsernames = new Dictionary<ushort, string>();
         foreach (var kvp in NetworkedPlayers)
         {
             if (kvp.Key != LocalPlayerId)
             {
-                remotePlayerIds.Add(kvp.Key);
+                string username = PlayerUsernames.ContainsKey(kvp.Key) ? PlayerUsernames[kvp.Key] : "Player";
+                remotePlayersWithUsernames[kvp.Key] = username;
             }
         }
         
-        Logger.Info($"[CLIENT] Remembered {remotePlayerIds.Count} remote players for recreation");
+        Logger.Info($"[CLIENT] Remembered {remotePlayersWithUsernames.Count} remote players for recreation");
         
         // Clear all networked players from current scene
         foreach (var kvp in NetworkedPlayers.ToList())
@@ -338,20 +366,21 @@ public static class NetworkManager
         if (SceneManager.ActiveScene != null)
         {
             // Recreate local player
-            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true);
+            string localUsername = PlayerUsernames.ContainsKey(LocalPlayerId) ? PlayerUsernames[LocalPlayerId] : "Player";
+            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, localUsername);
             SceneManager.ActiveScene.AddEntity(localPlayer);
             NetworkedPlayers[LocalPlayerId] = localPlayer;
             
-            Logger.Info($"[CLIENT] Recreated local player with ID {LocalPlayerId} in new level");
+            Logger.Info($"[CLIENT] Recreated local player with ID {LocalPlayerId} ({localUsername}) in new level");
             
             // Recreate all remote players that were in the previous level
-            foreach (ushort playerId in remotePlayerIds)
+            foreach (var kvp in remotePlayersWithUsernames)
             {
-                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false);
+                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
                 SceneManager.ActiveScene.AddEntity(remotePlayer);
-                NetworkedPlayers[playerId] = remotePlayer;
+                NetworkedPlayers[kvp.Key] = remotePlayer;
                 
-                Logger.Info($"[CLIENT] Recreated remote player with ID {playerId} in new level");
+                Logger.Info($"[CLIENT] Recreated remote player with ID {kvp.Key} ({kvp.Value}) in new level");
             }
         }
         
@@ -382,13 +411,16 @@ public static class NetworkManager
         //Logger.Info($"[SERVER] Broadcasted player {playerId} position to all clients except {fromClientId}");
     }
 
-    public static void JoinServer(string ip)
+    public static void JoinServer(string ip, string username)
     {
         Client = new Client();
         Client.Connected += OnClientConnected;
         Client.ConnectionFailed += OnClientConnectionFailed;
         Client.Disconnected += OnClientDisconnected;
         Client.MessageReceived += HandleClientMessageReceived;
+        
+        // Store the username temporarily - we'll send it after connection
+        _pendingUsername = username;
         
         // Make sure to use the provided IP, not hardcoded localhost
         if (!ip.Contains(":"))
@@ -398,6 +430,8 @@ public static class NetworkManager
         Client.Connect(ip);
         Logger.Info($"[CLIENT] Connecting to server at {ip}");
     }
+    
+    private static string _pendingUsername = "";
     
     // Set callbacks for connection success/failure (used by JoinGui)
     public static void SetConnectionCallbacks(Action onSuccess, Action<string> onFailed)
@@ -447,6 +481,7 @@ public static class NetworkManager
             player.Dispose();
         }
         NetworkedPlayers.Clear();
+        PlayerUsernames.Clear();
      
         GuiManager.SetGui(new HostLeavedGui());
     }
@@ -519,6 +554,7 @@ public static class NetworkManager
         }
         
         NetworkedPlayers.Clear();
+        PlayerUsernames.Clear();
         
         Logger.Info("[NETWORK] Full cleanup completed");
     }
@@ -533,11 +569,27 @@ public static class NetworkManager
         
         Logger.Info($"[CLIENT] Received scene: {sceneInt}, LocalPlayerId: {LocalPlayerId}");
         
+        // Send username to server now that we have our player ID
+        if (Client != null && Client.IsConnected)
+        {
+            Message usernameMessage = Message.Create(MessageSendMode.Reliable, 8);
+            usernameMessage.AddString(_pendingUsername);
+            Client.Send(usernameMessage);
+            
+            // Store our own username
+            PlayerUsernames[LocalPlayerId] = _pendingUsername;
+            
+            Logger.Info($"[CLIENT] Sent username '{_pendingUsername}' to server");
+        }
+        
         int existingPlayerCount = message.GetInt();
-        List<ushort> existingPlayerIds = new List<ushort>();
+        Dictionary<ushort, string> existingPlayersWithUsernames = new Dictionary<ushort, string>();
         for (int i = 0; i < existingPlayerCount; i++)
         {
-            existingPlayerIds.Add(message.GetUShort());
+            ushort playerId = message.GetUShort();
+            string username = message.GetString();
+            existingPlayersWithUsernames[playerId] = username;
+            PlayerUsernames[playerId] = username;
         }
         
         Logger.Info($"[CLIENT] Existing players: {existingPlayerCount}");
@@ -593,21 +645,21 @@ public static class NetworkManager
         {
             Logger.Info("[CLIENT] Scene loaded, creating players...");
             
-            // Create local player
-            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true);
+            // Create local player with username
+            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, _pendingUsername);
             SceneManager.ActiveScene.AddEntity(localPlayer);
             NetworkedPlayers[LocalPlayerId] = localPlayer;
             
-            Logger.Info($"[CLIENT] Created local player with ID {LocalPlayerId}");
+            Logger.Info($"[CLIENT] Created local player with ID {LocalPlayerId} ({_pendingUsername})");
             
-            // Create existing remote players
-            foreach (ushort playerId in existingPlayerIds)
+            // Create existing remote players with usernames
+            foreach (var kvp in existingPlayersWithUsernames)
             {
-                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false);
+                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
                 SceneManager.ActiveScene.AddEntity(remotePlayer);
-                NetworkedPlayers[playerId] = remotePlayer;
+                NetworkedPlayers[kvp.Key] = remotePlayer;
                 
-                Logger.Info($"[CLIENT] Created remote player with ID {playerId}");
+                Logger.Info($"[CLIENT] Created remote player with ID {kvp.Key} ({kvp.Value})");
             }
         }
         else
@@ -649,16 +701,20 @@ public static class NetworkManager
     private static void HandlePlayerSpawn(Message message)
     {
         ushort playerId = message.GetUShort();
+        string username = message.GetString();
         
-        Logger.Info($"[SPAWN] Received spawn request for player {playerId}. LocalPlayerId: {LocalPlayerId}");
+        Logger.Info($"[SPAWN] Received spawn request for player {playerId} ({username}). LocalPlayerId: {LocalPlayerId}");
+        
+        // Store the username
+        PlayerUsernames[playerId] = username;
         
         if (playerId != LocalPlayerId && SceneManager.ActiveScene != null && !NetworkedPlayers.ContainsKey(playerId))
         {
-            Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false);
+            Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, username);
             SceneManager.ActiveScene.AddEntity(remotePlayer);
             NetworkedPlayers[playerId] = remotePlayer;
             
-            Logger.Info($"[SPAWN] Created remote player {playerId}");
+            Logger.Info($"[SPAWN] Created remote player {playerId} ({username})");
         }
         else
         {
@@ -687,6 +743,7 @@ public static class NetworkManager
             // Then dispose and remove from dictionary
             playerToRemove.Dispose();
             NetworkedPlayers.Remove(playerId);
+            PlayerUsernames.Remove(playerId);
             
             Logger.Info($"[DESPAWN] Successfully despawned and removed player {playerId}");
         }
