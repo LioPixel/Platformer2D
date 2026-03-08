@@ -1,7 +1,9 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Transformations;
 using Platformer2D.CSharp.Entities;
+using Platformer2D.CSharp.GUIs.Loading;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Utils.Async;
 
 namespace Platformer2D.CSharp.Scenes.Levels;
 
@@ -32,9 +34,12 @@ public class Level1 : LevelScene
         // In network games, the server handles the transition
         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
         {
-            SceneManager.SetScene(new Level2());
-            Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
-            SceneManager.ActiveScene?.AddEntity(player);
+            AsyncOperation operation10 = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
+            operation10.Completed += success =>
+            {
+                Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+                SceneManager.ActiveScene?.AddEntity(player);
+            };
         }
     }
 

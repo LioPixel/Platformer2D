@@ -1,16 +1,20 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Logging;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Transformations;
 using Bliss.CSharp.Windowing;
 using Platformer2D.CSharp.Entities;
+using Platformer2D.CSharp.GUIs.Loading;
 using Platformer2D.CSharp.Scenes.Levels;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
+using Sparkle.CSharp.GUI.Loading;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Utils.Async;
 using Veldrid;
 
 namespace Platformer2D.CSharp.GUIs;
@@ -36,9 +40,9 @@ public class MenuGui : Gui
         this.AddElement("fullscreen",
             new LabelElement(fullscreen, Anchor.BottomRight, new Vector2(0, 0), new Vector2(1.5F, 1.5F)));
 
-        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Platformer2D", 18);
-        this.AddElement("Test-Label",
-            new LabelElement(labelData, Anchor.TopCenter, new Vector2(0, 100), new Vector2(5, 5)));
+
+        ImageData logoData = new ImageData(ContentRegistry.Logo);
+        this.AddElement("logo", new ImageElement(logoData, Anchor.TopCenter, new Vector2(0, 50), scale: new Vector2(2,2)));
 
         string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace: JUMP";
         LabelData controlLabelData = new LabelData(ContentRegistry.Fontoe, controlText, 18, color: Color.White);
@@ -185,49 +189,56 @@ public class MenuGui : Gui
                 switch (dropDownElement.SelectedOption?.Text)
                 {
                     case "Level 1":
-                        SceneManager.SetScene(new Level1());
+                        AsyncOperation operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading"));
+                        operation.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 2":
-                        SceneManager.SetScene(new Level2());
+                        AsyncOperation operation2 = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
+                        operation2.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 3":
-                        SceneManager.SetScene(new Level3());
+                        AsyncOperation operation3 = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading"));
+                        operation3.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 4":
-                        SceneManager.SetScene(new Level4());
+                        AsyncOperation operation4 = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading"));
+                        operation4.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 5":
-                        SceneManager.SetScene(new Level5());
+                        AsyncOperation operation5 = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading"));
+                        operation5.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 6":
-                        SceneManager.SetScene(new Level6());
+                        AsyncOperation operation6 = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading"));
+                        operation6.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 7":
-                        SceneManager.SetScene(new Level7());
+                        AsyncOperation operation7 = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading"));
+                        operation7.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 8":
-                        SceneManager.SetScene(new Level8());
+                        AsyncOperation operation8 = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading"));
+                        operation8.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 9":
-                        SceneManager.SetScene(new Level9());
+                        AsyncOperation operation9 = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading"));
+                        operation9.Completed += OnCompletedLoading;
                         break;
 
                     case "Level 10":
-                        SceneManager.SetScene(new Level10());
+                        AsyncOperation operation10 = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading"));
+                        operation10.Completed += OnCompletedLoading;
                         break;
                 }
-
-                GuiManager.SetGui(null);
-                Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
-                SceneManager.ActiveScene?.AddEntity(player);
+                
                 return true;
             }));
         
@@ -270,6 +281,7 @@ public class MenuGui : Gui
                 switch (multiplayerdropDownElement.SelectedOption?.Text)
                 {
                     case "Host":
+                        //Logger.Error("test");
                         GuiManager.SetGui(new HostGui());
                         break;
 
@@ -297,5 +309,12 @@ public class MenuGui : Gui
         
         base.Draw(context, framebuffer);
 
+    }
+
+    private void OnCompletedLoading(bool success)
+    {
+        GuiManager.SetGui(null);
+        Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
+        SceneManager.ActiveScene?.AddEntity(player);
     }
 }

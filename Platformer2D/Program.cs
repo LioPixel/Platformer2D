@@ -1,5 +1,6 @@
 ﻿using Platformer2D.CSharp;
 using Sparkle.CSharp;
+using Sparkle.CSharp.GUI.Loading;
 using Veldrid;
 
 GameSettings settings = new GameSettings()
@@ -10,4 +11,4 @@ GameSettings settings = new GameSettings()
 };
 
 using PlatformerGame game = new PlatformerGame(settings);
-game.Run(null);
+game.Run(null, new LogoLoadingGui("Startup", "content/Sparkle/images/logo.png"));

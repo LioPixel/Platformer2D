@@ -1,12 +1,15 @@
-﻿using System.Numerics;
+﻿using System.ComponentModel;
+using System.Numerics;
 using Bliss.CSharp.Logging;
 using Bliss.CSharp.Transformations;
 using Platformer2D.CSharp.Entities;
 using Platformer2D.CSharp.GUIs;
+using Platformer2D.CSharp.GUIs.Loading;
 using Platformer2D.CSharp.Scenes.Levels;
 using Riptide;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.Scenes;
+using AsyncOperation = Sparkle.CSharp.Utils.Async.AsyncOperation;
 
 namespace Platformer2D.CSharp;
 
@@ -313,80 +316,85 @@ public static class NetworkManager
             kvp.Value.Dispose();
         }
         NetworkedPlayers.Clear();
+
+        AsyncOperation? operation = null;
         
         // Load the new level
         switch (sceneInt)
         {
             case 1:
                 Logger.Info("[CLIENT] Transitioning to Level1...");
-                SceneManager.SetScene(new Level1());
+                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 2:
                 Logger.Info("[CLIENT] Transitioning to Level2...");
-                SceneManager.SetScene(new Level2());
+                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 3:
                 Logger.Info("[CLIENT] Transitioning to Level3...");
-                SceneManager.SetScene(new Level3());
+                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 4:
                 Logger.Info("[CLIENT] Transitioning to Level4...");
-                SceneManager.SetScene(new Level4());
+                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 5:
                 Logger.Info("[CLIENT] Transitioning to Level5...");
-                SceneManager.SetScene(new Level5());
+                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 6:
                 Logger.Info("[CLIENT] Transitioning to Level6...");
-                SceneManager.SetScene(new Level6());
+                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 7:
                 Logger.Info("[CLIENT] Transitioning to Level7...");
-                SceneManager.SetScene(new Level7());
+                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 8:
                 Logger.Info("[CLIENT] Transitioning to Level8...");
-                SceneManager.SetScene(new Level8());
+                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 9:
                 Logger.Info("[CLIENT] Transitioning to Level9...");
-                SceneManager.SetScene(new Level9());
+                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 10:
                 Logger.Info("[CLIENT] Transitioning to Level10...");
-                SceneManager.SetScene(new Level10());
+                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading"));
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");
                 break;
         }
-        
-        // Recreate all players in new level
-        if (SceneManager.ActiveScene != null)
+
+        operation?.Completed += success =>
         {
-            // Recreate local player
-            string localUsername = PlayerUsernames.ContainsKey(LocalPlayerId) ? PlayerUsernames[LocalPlayerId] : "Player";
-            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, localUsername);
-            SceneManager.ActiveScene.AddEntity(localPlayer);
-            NetworkedPlayers[LocalPlayerId] = localPlayer;
-            
-            Logger.Info($"[CLIENT] Recreated local player with ID {LocalPlayerId} ({localUsername}) in new level");
-            
-            // Recreate all remote players that were in the previous level
-            foreach (var kvp in remotePlayersWithUsernames)
+            // Recreate all players in new level
+            if (SceneManager.ActiveScene != null)
             {
-                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
-                SceneManager.ActiveScene.AddEntity(remotePlayer);
-                NetworkedPlayers[kvp.Key] = remotePlayer;
+                // Recreate local player
+                string localUsername = PlayerUsernames.ContainsKey(LocalPlayerId) ? PlayerUsernames[LocalPlayerId] : "Player";
+                Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, localUsername);
+                SceneManager.ActiveScene.AddEntity(localPlayer);
+                NetworkedPlayers[LocalPlayerId] = localPlayer;
+            
+                Logger.Info($"[CLIENT] Recreated local player with ID {LocalPlayerId} ({localUsername}) in new level");
+            
+                // Recreate all remote players that were in the previous level
+                foreach (var kvp in remotePlayersWithUsernames)
+                {
+                    Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
+                    SceneManager.ActiveScene.AddEntity(remotePlayer);
+                    NetworkedPlayers[kvp.Key] = remotePlayer;
                 
-                Logger.Info($"[CLIENT] Recreated remote player with ID {kvp.Key} ({kvp.Value}) in new level");
+                    Logger.Info($"[CLIENT] Recreated remote player with ID {kvp.Key} ({kvp.Value}) in new level");
+                }
             }
-        }
         
-        _isLevelTransition = false;
+            _isLevelTransition = false;
         
-        Logger.Info($"[CLIENT] Level transition complete. Total players: {NetworkedPlayers.Count}");
+            Logger.Info($"[CLIENT] Level transition complete. Total players: {NetworkedPlayers.Count}");
+        };
     }
     
     private static void HandleServerPositionUpdate(Message message, ushort fromClientId)
@@ -594,78 +602,83 @@ public static class NetworkManager
         
         Logger.Info($"[CLIENT] Existing players: {existingPlayerCount}");
 
+        AsyncOperation? operation = null;
+        
         switch (sceneInt)
         {
             case 1:
                 Logger.Info("[CLIENT] Loading Level1...");
-                SceneManager.SetScene(new Level1());
+                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 2:
                 Logger.Info("[CLIENT] Loading Level2...");
-                SceneManager.SetScene(new Level2());
+                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 3:
                 Logger.Info("[CLIENT] Loading Level3...");
-                SceneManager.SetScene(new Level3());
+                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 4:
                 Logger.Info("[CLIENT] Loading Level4...");
-                SceneManager.SetScene(new Level4());
+                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 5:
                 Logger.Info("[CLIENT] Loading Level5...");
-                SceneManager.SetScene(new Level5());
+                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 6:
                 Logger.Info("[CLIENT] Loading Level6...");
-                SceneManager.SetScene(new Level6());
+                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 7:
                 Logger.Info("[CLIENT] Loading Level7...");
-                SceneManager.SetScene(new Level7());
+                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 8:
                 Logger.Info("[CLIENT] Loading Level8...");
-                SceneManager.SetScene(new Level8());
+                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 9:
                 Logger.Info("[CLIENT] Loading Level9...");
-                SceneManager.SetScene(new Level9());
+                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading"));
                 break;
             case 10:
                 Logger.Info("[CLIENT] Loading Level10...");
-                SceneManager.SetScene(new Level10());
+                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading"));
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");
                 break;
         }
 
-        if (SceneManager.ActiveScene != null)
+        operation?.Completed += success =>
         {
-            Logger.Info("[CLIENT] Scene loaded, creating players...");
-            
-            // Create local player with username
-            Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, _pendingUsername);
-            SceneManager.ActiveScene.AddEntity(localPlayer);
-            NetworkedPlayers[LocalPlayerId] = localPlayer;
-            
-            Logger.Info($"[CLIENT] Created local player with ID {LocalPlayerId} ({_pendingUsername})");
-            
-            // Create existing remote players with usernames
-            foreach (var kvp in existingPlayersWithUsernames)
+            if (SceneManager.ActiveScene != null)
             {
-                Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
-                SceneManager.ActiveScene.AddEntity(remotePlayer);
-                NetworkedPlayers[kvp.Key] = remotePlayer;
+                Logger.Info("[CLIENT] Scene loaded, creating players...");
+            
+                // Create local player with username
+                Player localPlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, true, _pendingUsername);
+                SceneManager.ActiveScene.AddEntity(localPlayer);
+                NetworkedPlayers[LocalPlayerId] = localPlayer;
+            
+                Logger.Info($"[CLIENT] Created local player with ID {LocalPlayerId} ({_pendingUsername})");
+            
+                // Create existing remote players with usernames
+                foreach (var kvp in existingPlayersWithUsernames)
+                {
+                    Player remotePlayer = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) }, false, kvp.Value);
+                    SceneManager.ActiveScene.AddEntity(remotePlayer);
+                    NetworkedPlayers[kvp.Key] = remotePlayer;
                 
-                Logger.Info($"[CLIENT] Created remote player with ID {kvp.Key} ({kvp.Value})");
+                    Logger.Info($"[CLIENT] Created remote player with ID {kvp.Key} ({kvp.Value})");
+                }
             }
-        }
-        else
-        {
-            Logger.Error("[CLIENT] ActiveScene is null after SetScene!");
-        }
+            else
+            {
+                Logger.Error("[CLIENT] ActiveScene is null after SetScene!");
+            }
+        };
     }
     
     // Message 2: Player position update (CLIENT receives broadcast from server)

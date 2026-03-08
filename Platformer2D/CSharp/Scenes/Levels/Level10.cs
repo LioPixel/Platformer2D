@@ -44,7 +44,7 @@ public class Level10 : LevelScene
         // Da dies das neueste Level ist, laden wir es bei Sieg neu oder gehen zu Level 8
         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
         {
-            SceneManager.SetScene(new Level1());
+            SceneManager.LoadScene(new Level1());
             Player player = new Player(new Transform() { Translation = new Vector3(0, -16 * 2, 0) });
             SceneManager.ActiveScene?.AddEntity(player);
         }

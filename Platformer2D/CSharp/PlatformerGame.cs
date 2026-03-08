@@ -14,7 +14,7 @@ namespace Platformer2D.CSharp;
 public class PlatformerGame : Game
 {
     public JsonConfig OptionsConfig;
-    
+
     public PlatformerGame(GameSettings settings) : base(settings)
     {
         JsonConfigBuilder jsonConfigBuilder = new JsonConfigBuilder("configs", "options");

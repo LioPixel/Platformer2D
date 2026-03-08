@@ -97,7 +97,7 @@ public abstract class LevelScene : Scene
             {
                 if (player.IsLocalPlayer)
                 {
-                    Vector3 playerPos = player.Transform.Translation;
+                    Vector3 playerPos = player.LocalTransform.Translation;
                     cam2D.Target = new Vector2(playerPos.X, playerPos.Y);   
                 }
             }

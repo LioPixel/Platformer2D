@@ -43,16 +43,16 @@ public class HostGui : Gui
         }));
         
         LabelData slotslabelData = new LabelData(ContentRegistry.Fontoe, "Slots", 18);
-        this.AddElement("slots", new LabelElement(slotslabelData, Anchor.TopCenter, new Vector2(0, 200), new Vector2(1.5F,1.5F)));
+        this.AddElement("slots", new LabelElement(slotslabelData, Anchor.Center, new Vector2(0, -70), new Vector2(1.5F,1.5F)));
         
         LabelData twolabelData = new LabelData(ContentRegistry.Fontoe, "2", 18);
-        this.AddElement("2", new LabelElement(twolabelData, Anchor.TopCenter, new Vector2(-130, 240), new Vector2(1.5F,1.5F)));
+        this.AddElement("2", new LabelElement(twolabelData, Anchor.Center, new Vector2(-130, -30), new Vector2(1.5F,1.5F)));
         
         LabelData tenlabelData = new LabelData(ContentRegistry.Fontoe, "10", 18);
-        this.AddElement("10", new LabelElement(tenlabelData, Anchor.TopCenter, new Vector2(130, 240), new Vector2(1.5F,1.5F)));
+        this.AddElement("10", new LabelElement(tenlabelData, Anchor.Center, new Vector2(130, -30), new Vector2(1.5F,1.5F)));
         
         LabelData slotValueData = new LabelData(ContentRegistry.Fontoe, "", 18);
-        this.AddElement("slot-value", new LabelElement(slotValueData, Anchor.TopCenter, new Vector2(0, 240), new Vector2(1.5F,1.5F)));
+        this.AddElement("slot-value", new LabelElement(slotValueData, Anchor.Center, new Vector2(0, -30), new Vector2(1.5F,1.5F)));
         
         // Texture slider bar.
         TextureSlideBarData textureSlideBarData = new TextureSlideBarData(

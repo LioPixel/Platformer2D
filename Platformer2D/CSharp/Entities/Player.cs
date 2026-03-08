@@ -319,7 +319,7 @@ public class Player : Entity
         if (_networkUpdateTimer >= NetworkUpdateInterval)
         {
             _networkUpdateTimer = 0;
-            NetworkManager.SendPlayerPosition(this.Transform.Translation, this.PoseType);
+            NetworkManager.SendPlayerPosition(this.LocalTransform.Translation, this.PoseType);
         }
 
         // Game over!
@@ -331,7 +331,7 @@ public class Player : Entity
 
     private void Respawn()
     {
-        this.Transform.Translation = _spawnPoint;
+        this.LocalTransform.Translation = _spawnPoint;
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
         body.LinearVelocity = Vector2.Zero; // Reset velocity
         
@@ -354,7 +354,7 @@ public class Player : Entity
 
         // Directly set position from network data
         // For kinematic bodies, we set the transform directly
-        this.Transform.Translation = NetworkedPosition;
+        this.LocalTransform.Translation = NetworkedPosition;
 
         // Debug every second
         _networkDebugTimer += (float)delta;
@@ -416,7 +416,7 @@ public class Player : Entity
             context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription, view: SceneManager.ActiveCam2D?.GetView());
             Vector2 scale = new Vector2(0.25F, 0.25F);
             Vector2 textSize = ContentRegistry.Fontoe.MeasureText(this.UserName, 18, scale);
-            Vector2 namePos = new Vector2(this.Transform.Translation.X - textSize.X / 2.0F, this.Transform.Translation.Y - 22);
+            Vector2 namePos = new Vector2(this.LocalTransform.Translation.X - textSize.X / 2.0F, this.LocalTransform.Translation.Y - 22);
             context.SpriteBatch.DrawText(ContentRegistry.Fontoe, this.UserName, namePos, 18, scale: scale, color: Color.Gray);
             context.SpriteBatch.End();
         }
@@ -426,7 +426,7 @@ public class Player : Entity
     {
         if (!IsLocalPlayer) return;
 
-        if (this.Transform.Translation.Y >= 5 * 16)
+        if (this.LocalTransform.Translation.Y >= 5 * 16)
         {
             GuiManager.SetGui(new GameOverGui());
         }
@@ -501,13 +501,13 @@ public class Player : Entity
 
         if (e.ShapeA.UserData is Portal entity1)
         {
-            this.Transform.Translation = new Vector3(entity1.TeleportPos, 0);
+            this.LocalTransform.Translation = new Vector3(entity1.TeleportPos, 0);
             SceneManager.ActiveCam2D!.Position = entity1.TeleportPos;
         }
 
         if (e.ShapeB.UserData is Portal entity2)
         {
-            this.Transform.Translation = new Vector3(entity2.TeleportPos, 0);
+            this.LocalTransform.Translation = new Vector3(entity2.TeleportPos, 0);
             SceneManager.ActiveCam2D!.Position = entity2.TeleportPos;
         }
     }

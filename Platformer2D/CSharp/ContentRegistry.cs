@@ -49,7 +49,9 @@ public class ContentRegistry : Registry {
     public static Texture2D UiButton { get; private set; }
     public static Texture2D UiSlider { get; private set; }
     public static Texture2D UiBar { get; private set; }
+    public static Texture2D UiFilledBar { get; private set; }
     public static Texture2D UiSliderLowRes { get; private set; }
+    public static Texture2D Logo { get; private set; }
     public static Font Fontoe { get; private set; }
 
     protected override void Load(ContentManager content)
@@ -96,7 +98,9 @@ public class ContentRegistry : Registry {
         UiButton = content.Load(new TextureContent("content/ui_button.png"));
         UiSlider = content.Load(new TextureContent("content/ui_slider.png"));
         UiBar = content.Load(new TextureContent("content/ui_bar.png"));
+        UiFilledBar = content.Load(new TextureContent("content/ui_filled_bar.png"));
         UiSliderLowRes = content.Load(new TextureContent("content/ui_slider_low_res.png"));
+        Logo = content.Load(new TextureContent("content/logo.png"));
         Fontoe = content.Load(new FontContent("content/fontoe.ttf"));
     }
 }

@@ -78,6 +78,6 @@ public class MovingBlock : Entity {
 
         // Apply physical movement.
         this._rigidBody.LinearVelocity = new Vector2(velocityX * scale, velocityY * scale);
-        this.Transform.Translation = new Vector3(posX * scale, posY * scale, 0.0F);
+        this.LocalTransform.Translation = new Vector3(posX * scale, posY * scale, 0.0F);
     }
 }

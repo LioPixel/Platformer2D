@@ -4,6 +4,7 @@ using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Transformations;
 using Platformer2D.CSharp.Entities;
+using Platformer2D.CSharp.GUIs.Loading;
 using Platformer2D.CSharp.Scenes;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
@@ -12,6 +13,7 @@ using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Utils.Async;
 using Veldrid;
 
 namespace Platformer2D.CSharp.GUIs;
@@ -40,8 +42,13 @@ public class PauseMenuGui : Gui
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Menu", 18, hoverColor: Color.White);
         
         this.AddElement("Exit-Button", new TextureButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, new Vector2(0, 0), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
-            SceneManager.SetScene(null);
-            GuiManager.SetGui(new MenuGui());
+            AsyncOperation operation = SceneManager.LoadSceneAsync(null, new ProgressBarLoadingGui("Loading"));
+
+            operation.Completed += success =>
+            {
+                GuiManager.SetGui(new MenuGui());
+            };
+
             return true;
         }));
         
@@ -67,16 +74,16 @@ public class PauseMenuGui : Gui
                     {
                         if (player.IsLocalPlayer)
                         {
-                            player.Transform.Translation = new Vector3(0, -16 * 2, 0);
+                            player.LocalTransform.Translation = new Vector3(0, -16 * 2, 0);
                             player.GetComponent<RigidBody2D>()?.Awake = true;
-                            SceneManager.ActiveCam2D?.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);   
+                            SceneManager.ActiveCam2D?.Position = new Vector2(player.LocalTransform.Translation.X, player.LocalTransform.Translation.Y);   
                         }
                                                 
                         if (NetworkManager.Client == null || !NetworkManager.Client.IsConnected)
                         {
-                            player.Transform.Translation = new Vector3(0, -16 * 2, 0);
+                            player.LocalTransform.Translation = new Vector3(0, -16 * 2, 0);
                             player.GetComponent<RigidBody2D>()?.Awake = true;
-                            SceneManager.ActiveCam2D?.Position = new Vector2(player.Transform.Translation.X, player.Transform.Translation.Y);   
+                            SceneManager.ActiveCam2D?.Position = new Vector2(player.LocalTransform.Translation.X, player.LocalTransform.Translation.Y);   
                         }
                     }
                 }

@@ -4,11 +4,13 @@ using Bliss.CSharp.Interact;
 using Bliss.CSharp.Interact.Keyboards;
 using Bliss.CSharp.Textures;
 using Bliss.CSharp.Windowing;
+using Platformer2D.CSharp.GUIs.Loading;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
 using Sparkle.CSharp.GUI.Elements.Data;
 using Sparkle.CSharp.Scenes;
+using Sparkle.CSharp.Utils.Async;
 using Veldrid;
 
 namespace Platformer2D.CSharp.GUIs;
@@ -33,8 +35,12 @@ public class HostLeavedGui : Gui
         LabelData menuButtonLabelData = new LabelData(ContentRegistry.Fontoe, "Back to Main Menu", 18, hoverColor: Color.White);
         
         this.AddElement("Menu-Button", new TextureButtonElement(menuButtonData, menuButtonLabelData, Anchor.Center, new Vector2(0, 60), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) => {
-            SceneManager.SetScene(null);
-            GuiManager.SetGui(new MenuGui());
+            AsyncOperation operation = SceneManager.LoadSceneAsync(null, new ProgressBarLoadingGui("Loading"));
+
+            operation.Completed += success =>
+            {
+                GuiManager.SetGui(new MenuGui());
+            };
             return true;
         }));
     }
