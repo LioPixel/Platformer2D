@@ -7,7 +7,7 @@ GameSettings settings = new GameSettings()
 {
     VSync = false,
     SampleCount = TextureSampleCount.Count8,
-    IconPath = "content/icon.png",
+    IconPath = "content/logo.png",
     Title = "Pixelis - 2D [By LioPixel & MrScautHD]"
 };
 

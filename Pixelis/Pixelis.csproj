@@ -5,7 +5,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <ApplicationIcon>content\icon.ico</ApplicationIcon>
+        <ApplicationIcon>content\logo.ico</ApplicationIcon>
         <LangVersion>14</LangVersion>
         <AssemblyName>Pixelis</AssemblyName>
         <RootNamespace>Pixelis</RootNamespace>
