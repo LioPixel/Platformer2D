@@ -25,7 +25,7 @@ public static class NetworkManager
     public static Dictionary<ushort, Player> NetworkedPlayers = new();
     
     // Dictionary to track player usernames by their client ID
-    public static Dictionary<ushort, string> PlayerUsernames = new();
+    public static Dictionary<ushort, string> PlayerUsernames = new(); 
     
     // Flag to prevent showing HostLeavedGui during level transitions
     private static bool _isLevelTransition = false;
@@ -324,43 +324,43 @@ public static class NetworkManager
         {
             case 1:
                 Logger.Info("[CLIENT] Transitioning to Level1...");
-                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 2:
                 Logger.Info("[CLIENT] Transitioning to Level2...");
-                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 3:
                 Logger.Info("[CLIENT] Transitioning to Level3...");
-                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 4:
                 Logger.Info("[CLIENT] Transitioning to Level4...");
-                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 5:
                 Logger.Info("[CLIENT] Transitioning to Level5...");
-                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 6:
                 Logger.Info("[CLIENT] Transitioning to Level6...");
-                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 7:
                 Logger.Info("[CLIENT] Transitioning to Level7...");
-                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 8:
                 Logger.Info("[CLIENT] Transitioning to Level8...");
-                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 9:
                 Logger.Info("[CLIENT] Transitioning to Level9...");
-                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 10:
                 Logger.Info("[CLIENT] Transitioning to Level10...");
-                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");
@@ -608,43 +608,43 @@ public static class NetworkManager
         {
             case 1:
                 Logger.Info("[CLIENT] Loading Level1...");
-                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level1(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 2:
                 Logger.Info("[CLIENT] Loading Level2...");
-                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level2(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 3:
                 Logger.Info("[CLIENT] Loading Level3...");
-                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level3(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 4:
                 Logger.Info("[CLIENT] Loading Level4...");
-                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level4(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 5:
                 Logger.Info("[CLIENT] Loading Level5...");
-                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level5(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 6:
                 Logger.Info("[CLIENT] Loading Level6...");
-                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level6(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 7:
                 Logger.Info("[CLIENT] Loading Level7...");
-                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level7(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 8:
                 Logger.Info("[CLIENT] Loading Level8...");
-                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level8(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 9:
                 Logger.Info("[CLIENT] Loading Level9...");
-                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level9(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             case 10:
                 Logger.Info("[CLIENT] Loading Level10...");
-                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading"));
+                operation = SceneManager.LoadSceneAsync(new Level10(), new ProgressBarLoadingGui("Loading", "Joining Server!"));
                 break;
             default:
                 Logger.Error($"[CLIENT] Unknown scene int: {sceneInt}");

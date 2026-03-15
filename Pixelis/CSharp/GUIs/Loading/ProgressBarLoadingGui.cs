@@ -1,5 +1,8 @@
 ﻿using System.Numerics;
 using Bliss.CSharp.Colors;
+using Bliss.CSharp.Textures;
+using Bliss.CSharp.Transformations;
+using Bliss.CSharp.Windowing;
 using Sparkle.CSharp.Graphics;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.GUI.Elements;
@@ -9,14 +12,20 @@ using Veldrid;
 
 namespace Pixelis.CSharp.GUIs.Loading;
 
-public class ProgressBarLoadingGui : LoadingGui {
-    
-    public ProgressBarLoadingGui(string name, float minTime = 2.5F, (int, int)? size = null) : base(name, minTime, size) { }
+public class ProgressBarLoadingGui : LoadingGui
+{
+
+    private string _loadingText;
+
+    public ProgressBarLoadingGui(string name, string loadingText = "Loading", float minTime = 2.5F, (int, int)? size = null) : base(name, minTime, size)
+    {
+        this._loadingText = loadingText;
+    }
     
     protected override void Init() {
         base.Init();
         
-        LabelData labelData = new LabelData(ContentRegistry.Fontoe, "Loading", 18);
+        LabelData labelData = new LabelData(ContentRegistry.Fontoe, _loadingText, 18);
         this.AddElement("loading_label", new LabelElement(labelData, Anchor.Center, Vector2.Zero, new Vector2(5, 5)));
         
         TextureSlideBarData textureSlideBarData = new TextureSlideBarData(
@@ -47,7 +56,22 @@ public class ProgressBarLoadingGui : LoadingGui {
     }
     
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer) {
-        context.CommandList.ClearColorTarget(0, Color.Black.ToRgbaFloat());
+        //context.CommandList.ClearColorTarget(0, Color.Black.ToRgbaFloat());
+        
+        IWindow window = GlobalGraphicsAssets.Window;
+
+        // Background
+        Texture2D backgroundTexture = ContentRegistry.Background2;
+        Vector2 backgroundSize = new Vector2((float)window.GetWidth() / backgroundTexture.Width,
+            (float)window.GetHeight() / backgroundTexture.Height);
+
+        context.SpriteBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+        context.SpriteBatch.DrawTexture(backgroundTexture, Vector2.Zero, scale: backgroundSize);
+        context.SpriteBatch.End();
+        
+        context.PrimitiveBatch.Begin(context.CommandList, framebuffer.OutputDescription);
+        context.PrimitiveBatch.DrawFilledRectangle(new RectangleF(0, 0, GlobalGraphicsAssets.Window.GetWidth(), GlobalGraphicsAssets.Window.GetHeight()), color: new Color(128, 128, 128, 128));
+        context.PrimitiveBatch.End();
         base.Draw(context, framebuffer);
     }
 }

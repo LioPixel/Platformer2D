@@ -78,11 +78,7 @@ public abstract class LevelScene : Scene
                 }
             }
         }
-
-        if (Input.IsKeyReleased(KeyboardKey.L))
-        {
-            Game.Instance?.Dispose();
-        }
+        
         
         Camera2D? cam2D = SceneManager.ActiveCam2D;
 

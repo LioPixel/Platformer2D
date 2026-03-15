@@ -48,19 +48,6 @@ public class HostLeavedGui : Gui
     protected override void Update(double delta)
     {
         base.Update(delta);
-
-        if (Input.IsKeyPressed(KeyboardKey.Escape))
-        {
-
-            if (SceneManager.ActiveScene == null)
-            {
-                GuiManager.SetGui(new MenuGui());
-            }
-            else
-            {
-                GuiManager.SetGui(new PauseMenuGui());
-            }
-        }
     }
 
     protected override void Draw(GraphicsContext context, Framebuffer framebuffer)

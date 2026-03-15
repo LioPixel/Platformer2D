@@ -264,7 +264,7 @@ public class MenuGui : Gui
         this.AddElement("Exit-Button", new TextureButtonElement(exitButtonData, exitButtonLabelData, Anchor.Center,
             new Vector2(0, 180), size: new Vector2(230, 40), textOffset: new Vector2(0, 1), clickFunc: (element) =>
             {
-                Game.Instance?.ShouldClose = true;
+                GuiManager.SetGui(new ExitGui());
                 return true;
             }));
 

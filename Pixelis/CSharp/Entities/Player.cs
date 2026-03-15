@@ -13,6 +13,8 @@ using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
 using Sparkle.CSharp.Graphics;
+using Sparkle.CSharp.Graphics.Particles.Dim2;
+using Sparkle.CSharp.Graphics.Particles.Dim2.Collisions.Providers;
 using Sparkle.CSharp.GUI;
 using Sparkle.CSharp.Physics.Dim2;
 using Sparkle.CSharp.Physics.Dim2.Def;
@@ -144,6 +146,31 @@ public class Player : Entity
         
         // Load font for name display - passe den Pfad an deine Font-Datei an
         this._nameFont = ContentRegistry.Fontoe; // Oder lade eine eigene Font
+        
+        ParticleDefinition2D footDust = new ParticleDefinition2D(ContentRegistry.Sprite) {
+            Looping = true,
+            Duration = 9999.0F,
+            EmissionRate = 0.0F,
+            MaxParticles = 120,
+            StartLifetime = 0.22F,
+            LifetimeRandomness = 0.08F,
+            StartSpeed = 2.2F * 16,
+            SpeedRandomness = 0.9F,
+            StartScale = new Vector2(0.10F, 0.10F),
+            EndScale = new Vector2(0.03F, 0.03F),
+            Acceleration = new Vector2(0, -1.5F) * 16,
+            Gravity = new Vector2(0, 3.0F) * 16,
+            Direction = new Vector2(1, -0.15F),
+            Spread = 0.9F,
+            SpawnBox = new Vector2(10.0F, 2.0F),
+            Bounciness = 0.0F,
+            CollisionDamping = 0.65F,
+            CollisionSurfaceOffset = 0.02F,
+            SimulateInWorldSpace = true
+        };
+
+        ParticleSystem2D footParticles = new ParticleSystem2D(footDust, new Vector3(0, 8, 0));
+        this.AddComponent(footParticles);
     }
 
     protected override void Update(double delta)
@@ -228,6 +255,8 @@ public class Player : Entity
             float maxSpeed = 50f;
             float jumpForce = 90;
 
+            bool emitParticles = false;
+
             float input = 0f;
             if ((Input.IsKeyDown(KeyboardKey.A) || Input.IsKeyDown(KeyboardKey.Left)) && !isLeftWallCol)
             {
@@ -236,6 +265,8 @@ public class Player : Entity
                 {
                     this._frameTime = 0.1F;
                     this.PoseType = PlayerPoseType.LeftWalk;
+                    this.GetComponent<ParticleSystem2D>()?.Definition.Direction = new Vector2(1, 0.15F);
+                    emitParticles = true;
                 }
             }
 
@@ -246,8 +277,24 @@ public class Player : Entity
                 {
                     this._frameTime = 0.1F;
                     this.PoseType = PlayerPoseType.RightWalk;
+                    this.GetComponent<ParticleSystem2D>()?.Definition.Direction = new Vector2(-1, 0.15F);
+                    emitParticles = true;
+
                 }
             }
+
+            if (emitParticles)
+            {
+                this.GetComponent<ParticleSystem2D>()?.Definition.EmissionRate = 28;
+                this.GetComponent<ParticleSystem2D>()?.Definition.Looping = true;
+            }
+            else
+            {
+                this.GetComponent<ParticleSystem2D>()?.Definition.EmissionRate = 0;
+                this.GetComponent<ParticleSystem2D>()?.Definition.Looping = false; 
+            }
+            
+            
 
             if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) &&
                 !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
