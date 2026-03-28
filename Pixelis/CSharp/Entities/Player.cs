@@ -9,6 +9,7 @@ using MiniAudioEx.Core.StandardAPI;
 using Pixelis.CSharp.GUIs;
 using Pixelis.CSharp.Scenes;
 using Pixelis.CSharp.Scenes.Levels;
+using Pixelis.CSharp.Items;
 using Sparkle.CSharp;
 using Sparkle.CSharp.Entities;
 using Sparkle.CSharp.Entities.Components;
@@ -52,7 +53,7 @@ public class Player : Entity
 
     // Network update timer
     private float _networkUpdateTimer;
-    private const float NetworkUpdateInterval = 0.016f; // Send updates 60 times per second
+    private const float NetworkUpdateInterval = 0.016f;
 
     // Debug timer
     private float _networkDebugTimer;
@@ -62,18 +63,24 @@ public class Player : Entity
     private Vector2 _nameOffset = new Vector2(0, -20);
 
     // Respawn system
-    private const float DEATH_Y = 100f; // Y-Position für Respawn (wenn Spieler runterfällt)
+    private const float DEATH_Y = 100f;
     private Vector3 _spawnPoint;
 
-    // Level completion - prevent triggering multiple times
+    // Level completion
     private bool _hasCompletedLevel = false;
+
+    // ── Item-Effekte ─────────────────────────────────────────────
+    private readonly List<ItemEffect> _effects = new();
+    private const float BaseMaxSpeed  = 50f;
+    private const float BaseGravity   = 15.5f;
+    private const float BaseJumpForce = 90f;
 
     public Player(Transform transform, bool isLocalPlayer = true, string userName = "") : base(transform, "player")
     {
         IsLocalPlayer = isLocalPlayer;
         UserName = userName;
         NetworkedPosition = transform.Translation;
-        _spawnPoint = transform.Translation; // Merke Spawn-Position
+        _spawnPoint = transform.Translation;
     }
 
     protected override void Init()
@@ -88,18 +95,17 @@ public class Player : Entity
         {
             Type = IsLocalPlayer ? BodyType.Dynamic : BodyType.Kinematic,
             FixedRotation = true,
-            GravityScale = IsLocalPlayer ? 15.5F : 0F
+            GravityScale = IsLocalPlayer ? BaseGravity : 0F
         }, new PolygonShape2D(Polygon.MakeBox(7, 8), new ShapeDef()
         {
             Density = 100,
             UserData = "Player",
             EnableContactEvents = IsLocalPlayer,
             EnableSensorEvents = IsLocalPlayer,
-            // Collision filtering: players don't collide with each other but DO collide with blocks
             Filter = new Filter()
             {
-                CategoryBits = 0x0002, // This is a player (category 2)
-                MaskBits = 0xFFFD // Collide with everything (0xFFFF) EXCEPT other players (NOT 0x0002)
+                CategoryBits = 0x0002,
+                MaskBits = 0xFFFD
             }
         }));
 
@@ -111,7 +117,6 @@ public class Player : Entity
             UserData = "PlayerLeftSensor",
             EnableContactEvents = false,
             EnableSensorEvents = true,
-            // Sensors detect walls/blocks but NOT other players
             Filter = new Filter()
             {
                 CategoryBits = 0x0002,
@@ -125,7 +130,6 @@ public class Player : Entity
             UserData = "PlayerRightSensor",
             EnableContactEvents = false,
             EnableSensorEvents = true,
-            // Sensors detect walls/blocks but NOT other players
             Filter = new Filter()
             {
                 CategoryBits = 0x0002,
@@ -133,7 +137,6 @@ public class Player : Entity
             }
         }, Polygon.MakeOffsetBox(2, 7, new Vector2(7, -1), Rotation.Identity));
 
-        // Only subscribe to contact events for local player
         if (IsLocalPlayer)
         {
             ((Simulation2D)this.Scene.Simulation).ContactBeginTouch += this.ContactBeginTouch;
@@ -143,10 +146,8 @@ public class Player : Entity
         }
 
         this._audioSource = new AudioSource();
-        
-        // Load font for name display - passe den Pfad an deine Font-Datei an
-        this._nameFont = ContentRegistry.Fontoe; // Oder lade eine eigene Font
-        
+        this._nameFont = ContentRegistry.Fontoe;
+
         ParticleDefinition2D footDust = new ParticleDefinition2D(ContentRegistry.Sprite) {
             Looping = true,
             Duration = 9999.0F,
@@ -173,28 +174,77 @@ public class Player : Entity
         this.AddComponent(footParticles);
     }
 
+
+    public void ApplyItem(ItemEffect effect)
+    {
+        _effects.RemoveAll(e => e.Type == effect.Type);
+        _effects.Add(effect);
+        ApplyScaleEffect();
+    }
+
+    // ── Item-Effekte: Hilfsmethoden ──────────────────────────────
+
+    private void UpdateEffects(double delta)
+    {
+        bool hadEffect = _effects.Count > 0;
+        _effects.RemoveAll(e => { e.Update((float)delta); return e.IsExpired(); });
+
+        // Wenn ein Effekt abgelaufen ist, Scale zurücksetzen
+        if (hadEffect && _effects.Count < _effects.Count + 1)
+            ApplyScaleEffect();
+    }
+
+    private float GetMaxSpeed()
+    {
+        float speed = BaseMaxSpeed;
+        foreach (var e in _effects)
+            if (e.Type == ItemType.SpeedBoost) speed *= 1.2f;
+        return speed;
+    }
+
+    private float GetScale()
+    {
+        float scale = 1f;
+        foreach (var e in _effects)
+        {
+            if (e.Type == ItemType.GrowBig)     scale *= 1.5f;
+            if (e.Type == ItemType.ShrinkSmall) scale *= 0.5f;
+        }
+        return scale;
+    }
+    
+    // NEU — über den Transform der Entity:
+    private void ApplyScaleEffect()
+    {
+        float scale = GetScale();
+        this.LocalTransform.Scale = new Vector3(scale, scale, 1f);
+
+        // Base height of player is 8 units (half of the 16px box)
+        // Adjust Y so feet stay grounded when scale changes
+        float baseHalfHeight = 8f;
+        float yAdjust = baseHalfHeight * (scale - 1f);
+
+        this._sprite.OffsetPosition = new Vector3(168f * scale, (-2f * scale) - yAdjust, 0f);
+    }
+    
     protected override void Update(double delta)
     {
         base.Update(delta);
 
-        // Handle networked player differently
+        // Effekte updaten (läuft nur für lokalen Spieler relevant)
+        if (IsLocalPlayer)
+            UpdateEffects(delta);
+
         if (!IsLocalPlayer)
         {
             UpdateNetworkedPlayer(delta);
             return;
         }
 
-        // Check if player fell too far
-        //if (this.Transform.Translation.Y > DEATH_Y)
-        //{
-        //    Respawn();
-        //}
-
         bool isGround = IsPlayerOnGround > 0;
         bool isLeftWallCol = _leftContacts.Count > 0;
         bool isRightWallCol = _rightContacts.Count > 0;
 
-        // Sprite animation.
         _timer += (float)delta;
 
         if (_isJumping)
@@ -216,14 +266,10 @@ public class Player : Entity
                         _isJumping = false;
 
                         if (this.PoseType == PlayerPoseType.JumpLeft)
-                        {
                             this.PoseType = PlayerPoseType.LeftIdle;
-                        }
 
                         if (this.PoseType == PlayerPoseType.JumpRight)
-                        {
                             this.PoseType = PlayerPoseType.RightIdle;
-                        }
                     }
                 }
 
@@ -249,11 +295,10 @@ public class Player : Entity
 
         if (GuiManager.ActiveGui == null)
         {
-            // --- PLAYER MOVEMENT ---
             float groundAccel = 3f;
-            float airAccel = 0.5f;
-            float maxSpeed = 50f;
-            float jumpForce = 90;
+            float airAccel    = 0.5f;
+            float maxSpeed    = GetMaxSpeed();   // ← Item-Effekt
+            float jumpForce   = BaseJumpForce;
 
             bool emitParticles = false;
 
@@ -279,7 +324,6 @@ public class Player : Entity
                     this.PoseType = PlayerPoseType.RightWalk;
                     this.GetComponent<ParticleSystem2D>()?.Definition.Direction = new Vector2(-1, 0.15F);
                     emitParticles = true;
-
                 }
             }
 
@@ -291,10 +335,8 @@ public class Player : Entity
             else
             {
                 this.GetComponent<ParticleSystem2D>()?.Definition.EmissionRate = 0;
-                this.GetComponent<ParticleSystem2D>()?.Definition.Looping = false; 
+                this.GetComponent<ParticleSystem2D>()?.Definition.Looping = false;
             }
-            
-            
 
             if (!Input.IsKeyDown(KeyboardKey.D) && !Input.IsKeyDown(KeyboardKey.Right) &&
                 !Input.IsKeyDown(KeyboardKey.A) && !Input.IsKeyDown(KeyboardKey.Left))
@@ -326,7 +368,6 @@ public class Player : Entity
                 velocity.X *= 0.8f;
             }
 
-            // Jump
             if ((Input.IsKeyPressed(KeyboardKey.Space)
                  || Input.IsKeyPressed(KeyboardKey.W)
                  || Input.IsKeyPressed(KeyboardKey.Up))
@@ -353,15 +394,12 @@ public class Player : Entity
                 this._isJumping = true;
 
                 if (((PixelisGame)Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"))
-                {
                     this._audioSource.Play(ContentRegistry.Jump);
-                }
             }
         }
 
         body.LinearVelocity = velocity;
 
-        // Network position sync
         _networkUpdateTimer += (float)delta;
         if (_networkUpdateTimer >= NetworkUpdateInterval)
         {
@@ -369,10 +407,7 @@ public class Player : Entity
             NetworkManager.SendPlayerPosition(this.LocalTransform.Translation, this.PoseType);
         }
 
-        // Game over!
         this.GameOver();
-
-        // Set sprite type.
         this.SetSpriteByPoseType();
     }
 
@@ -380,15 +415,9 @@ public class Player : Entity
     {
         this.LocalTransform.Translation = _spawnPoint;
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
-        body.LinearVelocity = Vector2.Zero; // Reset velocity
-        
-        // Optional: Spiele einen Sound ab
-        // if (((PlatformerGame)Game.Instance!).OptionsConfig.GetValue<bool>("Sounds"))
-        // {
-        //     this._audioSource.Play(ContentRegistry.RespawnSound);
-        // }
+        body.LinearVelocity = Vector2.Zero;
     }
-    
+
     public void SetSpawnPoint(Vector3 spawnPoint)
     {
         _spawnPoint = spawnPoint;
@@ -396,21 +425,13 @@ public class Player : Entity
 
     private void UpdateNetworkedPlayer(double delta)
     {
-        // Update pose type
         this.PoseType = NetworkedPoseType;
-
-        // Directly set position from network data
-        // For kinematic bodies, we set the transform directly
         this.LocalTransform.Translation = NetworkedPosition;
 
-        // Debug every second
         _networkDebugTimer += (float)delta;
         if (_networkDebugTimer >= 1.0f)
-        {
             _networkDebugTimer = 0;
-        }
 
-        // Update sprite animation
         _timer += (float)delta;
 
         if (_timer >= _frameTime)
@@ -424,7 +445,6 @@ public class Player : Entity
             _sprite.SourceRect = new Rectangle(this._frame * 48, 0, 48, 64);
         }
 
-        // Set sprite type
         this.SetSpriteByPoseType();
     }
 
@@ -432,23 +452,17 @@ public class Player : Entity
     {
         base.FixedUpdate(fixedStep);
 
-        // Only apply physics to local player
         if (!IsLocalPlayer) return;
 
         RigidBody2D body = this.GetComponent<RigidBody2D>()!;
-
         Vector2 platformVelocity = Vector2.Zero;
 
         foreach (ContactData contact in body.Contacts)
         {
             if (contact.ShapeA.UserData?.ToString() == "MovingBlock")
-            {
                 platformVelocity = contact.ShapeA.Body.LinearVelocity;
-            }
             else if (contact.ShapeB.UserData?.ToString() == "MovingBlock")
-            {
                 platformVelocity = contact.ShapeB.Body.LinearVelocity;
-            }
         }
 
         body.LinearVelocity += new Vector2(platformVelocity.X, 0);
@@ -474,46 +488,34 @@ public class Player : Entity
         if (!IsLocalPlayer) return;
 
         if (this.LocalTransform.Translation.Y >= 5 * 16)
-        {
             GuiManager.SetGui(new GameOverGui());
-        }
     }
 
     private void ContactBeginSensorTouch(SensorBeginTouchEvent e)
     {
         RigidBody2D myBody = this.GetComponent<RigidBody2D>()!;
-        
-        // Only track contacts if the sensor belongs to THIS player's body
+
         if (e.SensorShape.UserData?.ToString() == "PlayerLeftSensor" && e.SensorShape.Body == myBody.Body)
-        {
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
-        }
         else if (e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor" && e.VisitorShape.Body == myBody.Body)
-        {
             _leftContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
-        }
 
         if (e.SensorShape.UserData?.ToString() == "PlayerRightSensor" && e.SensorShape.Body == myBody.Body)
-        {
             _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
-        }
         else if (e.VisitorShape.UserData?.ToString() == "PlayerRightSensor" && e.VisitorShape.Body == myBody.Body)
-        {
             _rightContacts.Add(ContactKey(e.SensorShape, e.VisitorShape));
-        }
     }
 
     private void ContactEndSensorTouch(SensorEndTouchEvent e)
     {
         RigidBody2D myBody = this.GetComponent<RigidBody2D>()!;
-        
-        // Only remove contacts if the sensor belongs to THIS player's body
+
         bool isMyLeftSensor = (e.SensorShape.UserData?.ToString() == "PlayerLeftSensor" && e.SensorShape.Body == myBody.Body) ||
                               (e.VisitorShape.UserData?.ToString() == "PlayerLeftSensor" && e.VisitorShape.Body == myBody.Body);
-        
+
         bool isMyRightSensor = (e.SensorShape.UserData?.ToString() == "PlayerRightSensor" && e.SensorShape.Body == myBody.Body) ||
                                (e.VisitorShape.UserData?.ToString() == "PlayerRightSensor" && e.VisitorShape.Body == myBody.Body);
-        
+
         if (isMyLeftSensor || isMyRightSensor)
         {
             ulong key = ContactKey(e.SensorShape, e.VisitorShape);
@@ -528,17 +530,14 @@ public class Player : Entity
         {
             ulong key = ContactKey(e.ShapeA, e.ShapeB);
             if (_groundContacts.Add(key))
-            {
                 IsPlayerOnGround = _groundContacts.Count;
-            }
         }
 
         if ((e.ShapeA.UserData?.ToString() == "flag") ||
-            e.ShapeB.UserData?.ToString() == "flag")
+             e.ShapeB.UserData?.ToString() == "flag")
         {
             ((LevelScene)this.Scene).WonLevel = true;
-            
-            // Only the local player should trigger network level completion
+
             if (IsLocalPlayer && !_hasCompletedLevel)
             {
                 _hasCompletedLevel = true;
@@ -561,56 +560,22 @@ public class Player : Entity
 
     private void OnLevelComplete()
     {
-        // Determine the next level based on current scene
         string nextLevel = DetermineNextLevel();
-        
         Bliss.CSharp.Logging.Logger.Info($"[PLAYER] Level completed! Moving all players to: {nextLevel}");
-        
-        // Notify the server to move all players to the next level
         NetworkManager.NotifyLevelComplete(nextLevel);
     }
 
     private string DetermineNextLevel()
     {
-        // Check what the current scene is and determine next level
-        if (this.Scene is Level1)
-        {
-            return "Level 2";
-        }
-        else if (this.Scene is Level2)
-        {
-            return "Level 3";
-        }
-        else if (this.Scene is Level3)
-        {
-            return "Level 4";
-        }
-        else if (this.Scene is Level4)
-        {
-            return "Level 5";
-        }
-        else if (this.Scene is Level5)
-        {
-            return "Level 6";
-        }
-        else if (this.Scene is Level6)
-        {
-            return "Level 7";
-        }
-        else if (this.Scene is Level7)
-        {
-            return "Level 8";
-        }
-        else if (this.Scene is Level8)
-        {
-            return "Level 9";
-        }
-        else if (this.Scene is Level9)
-        {
-            return "Level 10";
-        }
-        
-        // Default fallback
+        if (this.Scene is Level1) return "Level 2";
+        if (this.Scene is Level2) return "Level 3";
+        if (this.Scene is Level3) return "Level 4";
+        if (this.Scene is Level4) return "Level 5";
+        if (this.Scene is Level5) return "Level 6";
+        if (this.Scene is Level6) return "Level 7";
+        if (this.Scene is Level7) return "Level 8";
+        if (this.Scene is Level8) return "Level 9";
+        if (this.Scene is Level9) return "Level 10";
         return "Level 1";
     }
 
@@ -618,9 +583,7 @@ public class Player : Entity
     {
         ulong key = ContactKey(e.ShapeA, e.ShapeB);
         if (_groundContacts.Remove(key))
-        {
             IsPlayerOnGround = _groundContacts.Count;
-        }
     }
 
     private void SetSpriteByPoseType()

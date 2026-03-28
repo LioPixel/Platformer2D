@@ -44,7 +44,7 @@ public class MenuGui : Gui
         ImageData logoData = new ImageData(ContentRegistry.Logo);
         this.AddElement("logo", new ImageElement(logoData, Anchor.TopCenter, new Vector2(0, 50), scale: new Vector2(2,2)));
 
-        string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace: JUMP";
+        string controlText = "Controls:\nA/Left: LEFT\nD/Right: RIGHT\nSpace/Up: JUMP";
         LabelData controlLabelData = new LabelData(ContentRegistry.Fontoe, controlText, 18, color: Color.White);
         this.AddElement("Control-Label", new LabelElement(controlLabelData, Anchor.TopLeft, new Vector2(10, 10)));
 

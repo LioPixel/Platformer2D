@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Numerics;
+﻿using System.Numerics;
 using Bliss.CSharp.Logging;
 using Bliss.CSharp.Transformations;
 using Pixelis.CSharp.Entities;
